@@ -35,6 +35,7 @@ and send encrypted "dirty" tables back to the server
 		Next_Packet_Len:%(numeric)\r\n
 		Packet_Serial_Num:%(numeric)\r\n
 		Transmition_Type:%(numeric->constant)\r\n
+		Database:%(string)\r\n
 		Table_Name:%(string)\r\n
 	}
 */
@@ -48,7 +49,6 @@ and send encrypted "dirty" tables back to the server
 		%(Column_Name_Placeholder_#N):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
 	}
 */
-
 
 void recvPacket(char* buffer);
 

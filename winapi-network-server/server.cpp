@@ -42,16 +42,7 @@ int main() {
 	if (serverSocket == INVALID_SOCKET) {
 		ExitProcess(1);
 	}
-	/*
-	{\r\n
-		Op_Code:%(numeric->constant)\r\n
-		Packet_Serial_Num:%(numeric)\r\n
-		Next_Packet_Len:%(numeric)\r\n
-		Transmition_Type:%(numeric->constant)\r\n
-		Database:%(string)\r\n
-		Table_Name: %(string)\r\n
-	}
-*/
+	
 	SOCKET cl = INVALID_SOCKET;
 	sockaddr_in clAddress;
 	memset(&clAddress, 0, sizeof(clAddress));

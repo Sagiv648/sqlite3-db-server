@@ -33,27 +33,6 @@ void packet::setPacket(char opcode, int serialNum, size_t nextPacketLen, char tr
 	packet::table_name = tableName;
 	packet::is_Data_Packet = isDataPacket;
 }
-//Packet header:
-/*
-	{\r\n
-		Op_Code:%(numeric->constant)\r\n
-		Next_Packet_Len:%(numeric)\r\n
-		Packet_Serial_Num:%(numeric)\r\n
-		Transmition_Type:%(numeric->constant)\r\n
-		Database:%(string)\r\n
-		Table_Name:%(string)\r\n
-	}
-*/
-
-
-//Actual data packet:
-/*
-	{\r\n
-		%(Column_Name_Placeholder_#1):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
-		%(Column_Name_Placeholder_#2):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
-		%(Column_Name_Placeholder_#N):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
-	}
-*/
 
 void packet::buildHeaderPacket(char* packetBuffer) {
 
@@ -76,18 +55,6 @@ void packet::buildHeaderPacket(char* packetBuffer) {
 	packetBuffer[buffer.size()] = 0;
 	
 }
-
-//Packet header:
-/*
-	{\r\n
-		Op_Code:%(numeric->constant)\r\n
-		Next_Packet_Len:%(numeric)\r\n
-		Packet_Serial_Num:%(numeric)\r\n
-		Transmition_Type:%(numeric->constant)\r\n
-		Database:%(string)\r\n
-		Table_Name:%(string)\r\n
-	}
-*/
 
 //Returns 1 for success and 0 for failure
 int packet::recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p) {
@@ -122,7 +89,7 @@ int packet::recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p
 					for (; j < buffer.size() && buffer[j] != '\r'; j++);
 				
 					container.push_back(buffer.substr((size_t)t, (size_t)j - t));
-					//cout << container[container.size() - 1] << '\n';
+					
 				}
 			}
 		}
@@ -136,15 +103,6 @@ int packet::recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p
 	tInfo = table_info(container[4], container[5], stoi(container[3]), stoi(container[2]));
 	
 }
-
-//Actual data packet:
-/*
-	{\r\n
-		%Column_Name_Placeholder_#1:%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N)\r\n
-		%(Column_Name_Placeholder_#2):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
-		%(Column_Name_Placeholder_#N):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
-	}
-*/
 
 void packet::buildDataPacket(char* packetBuffer, table_info& tInfo) {
 
@@ -163,7 +121,7 @@ void packet::buildDataPacket(char* packetBuffer, table_info& tInfo) {
 		}
 	}
 	buffer += '}';
-	//cout << buffer;
+	
 	const char* tmp = buffer.c_str();
 	memcpy(packetBuffer, tmp, strlen(tmp));
 	packetBuffer[buffer.size()] = 0;
@@ -172,10 +130,7 @@ void packet::buildDataPacket(char* packetBuffer, table_info& tInfo) {
 
 void packet::recieveDataPacket(char* packetBuffer, table_info& tInfo) {
 	string buffer(packetBuffer);
-	//Order of operations:
 
-	//1) Parse the column name
-	//2) Parse the data itself
 	int i = 0;
 
 	
