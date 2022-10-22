@@ -3,7 +3,9 @@
 #include "utils.hpp"
 #include "network.hpp"
 
-//1) packet_serial_num, 2) next_packet_len, 3) transmition_type, 4) table_name
+
+
+//TODO: Refactor table_info class to be managed in a better way and to account for the column types
 class table_info {
 public:
 	std::string database;
