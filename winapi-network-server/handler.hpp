@@ -10,9 +10,9 @@
 #include <Windows.h>
 #include <sqlite3.h>
 #include <WinSock2.h>
-#include <queue>
 #include "utils.hpp"
 #include "packet.hpp"
+#include "network.hpp"
 
 #define MAX_HANDLERS 5
 
@@ -31,14 +31,19 @@ typedef struct {
 	DWORD threadId;
 	handler_input handlerInput;
 	SOCKET socket;
+	bool free;
 
 }handler_info;
 
 
 int setup_handlers(handler_info handlers[], SOCKET serverSocket);
 
-int sqliteCallback(void* table, int count, char** colData, char** colName);
+int handlers_scheduler(handler_info handlers[], char* packetBuffer);
 
-int readTable(table_info* tName);
+int sqliteCallbackRead(void* table, int count, char** colData, char** colName);
+
+int readTable(table_info* table);
+
+int writeTable(table_info* table);
 
 #endif // !HANDLER_H_

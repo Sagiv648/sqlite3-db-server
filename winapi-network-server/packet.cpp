@@ -101,6 +101,7 @@ int packet::recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p
 
 	p = packet(stoi(container[0]), stoi(container[2]), stoi(container[1]), stoi(container[3]), container[4], container[5], false);
 	tInfo = table_info(container[4], container[5], stoi(container[3]), stoi(container[2]));
+	return 1;
 	
 }
 

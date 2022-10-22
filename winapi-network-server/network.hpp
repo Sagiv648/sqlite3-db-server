@@ -13,8 +13,13 @@
 #define READ_TABLE 1
 #define WRITE_TABLE 2
 
-//TODO: Probably compact all the packet characteristics into a single struct/class
-char* sendPacket(int sender, int file_mod, size_t fileSz, string fileName);
+//According to last getsockopt, the buffer size of the recv buffer and send buffer of the network is 64 KiB
+
+
+#define BUFLEN 65536 // == 1024*64 -> 64 KiB
+
+
+
 
 /*Since the application is mainly to have a client computer access a db from a server through the network
 the client will get the tables from the server through the network in an encrypted fashion which the client app will have the means to decrypt
@@ -44,12 +49,12 @@ and send encrypted "dirty" tables back to the server
 //Actual data packet:
 /*
 	{\r\n
-		%(Column_Name_Placeholder_#1):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
-		%(Column_Name_Placeholder_#2):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
-		%(Column_Name_Placeholder_#N):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
+		(Column_Name_Placeholder_#1):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#2):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#N):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
 	}
 */
 
-void recvPacket(char* buffer);
+
 
 #endif // !_NETWORK_H_

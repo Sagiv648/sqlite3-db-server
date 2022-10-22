@@ -18,7 +18,10 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 
-#define BUFLEN 8192 // == 1024*8 -> 8 KiB
+
+
+
+
 sockaddr_in address;
 
 SOCKET server_setup(std::map<string, string> varMapping);
@@ -26,6 +29,7 @@ SOCKET server_setup(std::map<string, string> varMapping);
 handler_info handlers[MAX_HANDLERS];
 
 int main() {
+
 	string test = readFromFile();
 
 	if (test == "") {
@@ -37,6 +41,9 @@ int main() {
 	if (varMapping.size() == 0) {
 		ExitProcess(1);
 	}
+
+
+
 	SOCKET serverSocket = server_setup(varMapping);
 	
 	if (serverSocket == INVALID_SOCKET) {
@@ -46,15 +53,16 @@ int main() {
 	SOCKET cl = INVALID_SOCKET;
 	sockaddr_in clAddress;
 	memset(&clAddress, 0, sizeof(clAddress));
-	char buffer[BUFLEN];
+	char* buffer = new char[BUFLEN];
 	ZeroMemory(buffer, BUFLEN);
 
 	if (setup_handlers(handlers, serverSocket) != 0) {
 		cout << "No memory for thread creation\n";
 		ExitProcess(1);
 	}
-
 	
+	
+
 	//------------------------------------------------------ test section -------------------------------------------------------------------
 
 	//Actual data packet:
@@ -71,15 +79,7 @@ int main() {
 
 	 //Input check to test against inconsistencies in the header packet format.
 	 //Correct format but incorrect info will be handled appropriately
-	 if (packet::recieveHeaderPacket(headerPacket, handlers[0].handlerInput.t, handlers[0].handlerInput.p) == 0) {
-		 // Do something
-		 cout << "incorrect format\n";
-	}
-	else {
-
-		 ResumeThread(handlers[0].hHandler);
-
-	}
+	 
 	
 	
 	
@@ -111,7 +111,7 @@ int main() {
 	//	*/
 	//}
 	
-	while (true);
+	 while (true);
 
 	
 
@@ -141,10 +141,24 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 		return INVALID_SOCKET;
 	}
 
-	memset(&address, 0, sizeof(address));
+	struct addrinfo* result = NULL, * ptr = NULL, hints;
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	cout << varMapping["PORT"] << '\n';
+	if (getaddrinfo(NULL, varMapping["PORT"].c_str(), &hints, &result) != 0) {
+		cout << "error with getaddrinfo with error " << WSAGetLastError();
+		ExitProcess(1);
+	}
+
+
+
+	/*memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
 	address.sin_port = htons(PORT);
-	address.sin_addr.S_un.S_addr = inet_addr(HOST);
+	address.sin_addr.S_un.S_addr = inet_addr(HOST);*/
 	SOCKET serverSocket = INVALID_SOCKET;
 
 	if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
@@ -156,7 +170,7 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 	std::cout << "Socket created successfully\n";
 
 
-	if (bind(serverSocket, (sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
+	if (bind(serverSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
 		std::cout << "Socket failed to bind with error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
 		WSACleanup();
