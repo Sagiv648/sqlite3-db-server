@@ -79,9 +79,9 @@ int main() {
 
 	 //Input check to test against inconsistencies in the header packet format.
 	 //Correct format but incorrect info will be handled appropriately
-	 
-	
-	
+	 //cout << "before scheduler\n";
+	 handlers_scheduler(handlers, headerPacket);
+	 //cout << "After scheduler\n";
 	
 	
 	/*
@@ -147,7 +147,7 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
-	cout << varMapping["PORT"] << '\n';
+	//cout << varMapping["PORT"] << '\n';
 	if (getaddrinfo(NULL, varMapping["PORT"].c_str(), &hints, &result) != 0) {
 		cout << "error with getaddrinfo with error " << WSAGetLastError();
 		ExitProcess(1);

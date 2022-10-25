@@ -142,23 +142,25 @@ int packet::recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p
 		(Column_Name_Placeholder_#N)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
 	}
 */
-//TODO: Refactor buildDataPacket to include the column type
+//TODO: Refactor buildDataPacket to include the column type -> TO CHECK
 void packet::buildDataPacket(char* packetBuffer, table_info& tInfo) {
 
 	string buffer("");
 	buffer += "{\r\n";
 	size_t i;
 	size_t k;
-	for (i = 0; i < tInfo.columns.size(); ++i) {
-		buffer += tInfo.columns[i] + ':';
-		
-		for (k = 0; k < tInfo.data[i].size(); k++) {
-			if(k + 1 == tInfo.data[i].size())
-				buffer += tInfo.data[i][k] + "\r\n";
+	
+
+	for (i = 0; i < tInfo.getSize(); ++i) {
+		buffer += tInfo[i].getColName() + '|' + tInfo[i].getColType() + ':';
+		for (k = 0; k < tInfo[i].getSize(); k++) {
+			if (k + 1 == tInfo[i].getSize())
+				buffer += tInfo[i][k] + "\r\n";
 			else
-			buffer += tInfo.data[i][k] + '|';
+				buffer += tInfo[i][k] + '|';
 		}
 	}
+	
 	buffer += '}';
 	
 	const char* tmp = buffer.c_str();
@@ -166,33 +168,47 @@ void packet::buildDataPacket(char* packetBuffer, table_info& tInfo) {
 	packetBuffer[buffer.size()] = 0;
 
 }
-//TODO: Refactor recieveDataPacket to include the column type
+
+
+//Actual data packet:
+/*
+	{\r\n
+		(Column_Name_Placeholder_#1)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#2)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#N)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+	}
+*/
+
+//TODO: Refactor recieveDataPacket to include the column type -> TO CHECK
 void packet::recieveDataPacket(char* packetBuffer, table_info& tInfo) {
 	string buffer(packetBuffer);
 
 	int i = 0;
 
-	
 	for (; i < buffer.size(); ++i) {
-		if (buffer[i] == '\n' && buffer[(size_t)i+1] != '}') {
-			int k = i + 1;
-			for (; i < buffer.size() && buffer[i] != ':'; ++i);
-			tInfo.columns.push_back(buffer.substr(k, (size_t)i - k));
-	
-			// At this point buffer[i] is at the ':'
-			tInfo.data.push_back(vector<string>());
 
-			int t = i + 1;
-			for (; i < buffer.size() && buffer[i] != '\r'; ++i) {
-				if (buffer[i] == '|') {
-					tInfo.data[tInfo.columns.size() - 1].push_back(buffer.substr(t, (size_t)i - t));
-					t = i + 1;
-				}
+		if (buffer[i] == '\n' && buffer[(size_t)i + 1] != '}') {
+			
+			string colName = "";
+			string colType = "";
+			for (++i; i < buffer.size() && buffer[i] != '|'; ++i) {
+				colName += buffer[i];
 			}
-			// At this point buffer[i] is at the '\r'
-			tInfo.data[tInfo.columns.size() - 1].push_back(buffer.substr(t, (size_t)i - t));
+			for (++i; i < buffer.size() && buffer[i] != ':'; ++i) {
+				colType += buffer[i];
+			}
 
-
+			tInfo.addColumn(Column(colName, colType));
+			
+			for (; i < buffer.size() && buffer[i] != '\r'; ++i) {
+				int k = i + 1;
+				string data = "";
+				for (; i < buffer.size() && buffer[i] != '|'; ++i) {
+					data += buffer[i];
+				}
+				tInfo[tInfo.getSize() - 1].addData(data);
+			}
 		}
 	}
+	
 }

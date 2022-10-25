@@ -42,6 +42,8 @@ int handlers_scheduler(handler_info handlers[], char* packetBuffer);
 
 int sqliteCallbackRead(void* table, int count, char** colData, char** colName);
 
+int sqliteCallbackReadTypes(void* table, int count, char** data, char** columns);
+
 int readTable(table_info* table);
 
 int writeTable(table_info* table);

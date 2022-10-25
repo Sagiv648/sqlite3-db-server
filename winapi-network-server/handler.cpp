@@ -13,7 +13,6 @@ DWORD mainHandler(void* handlerInput) {
 	// packet class and table_info class are initialized by the recieveHeaderPacket function
 	while (true)
 	{
-		
 		char* buffer = new char[BUFLEN];
 		ZeroMemory(buffer, BUFLEN);
 		switch (handler->handlerInput.p.transmition_type)
@@ -73,15 +72,20 @@ int setup_handlers(handler_info handlers[], SOCKET serverSock) {
 int sqliteCallbackRead(void* table, int count, char** data, char** columns) {
 
 	table_info* ptr = (table_info*)table;
+	int i;
 
-
-	for (int i = 0; i < count; i++) {
-		if (ptr->columns.size() != count) {
-			ptr->columns.push_back(columns[i]);
-			ptr->data.push_back(vector<string>());
+	size_t totalCols = ptr->getSize();
+	for (i = 0; i < count; i++) {
+		if (totalCols > 0) {
+			(*ptr)[i].setColName(string(columns[i]));
+			totalCols--;
 		}
-		ptr->data[i].push_back(data[i]);
+		(*ptr)[i].addData(string(data[i]));
+		
+
+
 	}
+	
 	
 	return 0;
 }
@@ -91,8 +95,8 @@ int writeTable(table_info* table) {
 
 	
 	sqlite3* db;
-	sqlite3_open(table->database.c_str(), &db);
-	string sql = "insert or replace into " + table->name + " values (";
+	sqlite3_open(table->getDbName().c_str(), &db);
+	string sql = "insert or replace into " + table->getTableName() + " values (";
 
 	/*("11", "johnny", 27, "x science"),
 		("12", "jerry", 28, "t science"),
@@ -103,26 +107,25 @@ int writeTable(table_info* table) {
 	
 	int i;
 	int j;
-	for (i = 0; i < table->data[0].size(); ++i) {
-		for (j = 0; j < table->data.size(); ++j) {
-			if ((size_t)j + 1 == table->data.size()) {
 
-				sql += '\"' + table->data[j][i] + '\"' + ')';
-			}
-			else {
-				if (j == 2) {
-					sql += table->data[j][i] + ',';
-					continue;
-				}
-				sql += '\"' + table->data[j][i] + '\"' + ',';
-			}
+	for (i = 0; i < (*table)[0].getSize(); i++) {
+		for (j = 0; j < (*table).getSize(); j++) {
+
+			if ((*table)[i].getColType() == "INTEGER")
+				sql += (*table)[i][j] + ',';
+			else
+				sql += '\"' + (*table)[i][j] + '\"' + ',';
+
+				
 		}
-		if ((size_t)i + 1 != table->data[0].size()) {
-			sql += ',';
-			sql += "\n(";
-		}
-		
+		sql[sql.size()] = ')';
+		if ((size_t)i + 1 == (*table)[0].getSize())
+			sql += ';';
+		else
+			sql += ",\n";
 	}
+
+	
 	sql += ';';
 	char* errMsg = NULL;
 	DWORD mtxResult = WaitForSingleObject(writerMutex, INFINITE);
@@ -141,33 +144,63 @@ int writeTable(table_info* table) {
 
 //TODO: Handle the event that the table to be read is larger than 64 KiB
 //One way could be to count each byte read from the table and test whether it's larger or can fit, if larger an additional allocation could be required along with an additional send()
+//Potentially having a vector of char* for the problem of data larger than 64 KiB, probably max up to 2 char * with 64 KiB heap allocated memory
 int readTable(table_info* table) {
 
 	sqlite3* db;
 	
-	sqlite3_open(table->database.c_str(), &db);
-	cout << "readTable: tablename is " << table->name << '\n';
-	string sql = "select * from " + table->name + ';';
+	sqlite3_open(table->getDbName().c_str(), &db);
+	//cout << "db name is " << table->getDbName() << '\n';
+	//cout << "readTable: tablename is " << table->getTableName() << '\n';
+
+	string sqlTableInfo = "pragma table_info ";
+	sqlTableInfo += '(' + table->getTableName() + ");";
+	//cout << "sql query is " << sqlTableInfo << '\n';
+
 	char* errMsg = NULL;
 	
-	sqlite3_exec(db, sql.c_str(), sqliteCallbackRead, table, &errMsg);
-	
+	sqlite3_exec(db, sqlTableInfo.c_str(), sqliteCallbackReadTypes, table, &errMsg);
+	//printf("err msg is: %s\n", errMsg);
 	if (errMsg != NULL) {
+		cout << "err msg not null?\n";
+		sqlite3_free(errMsg);
+		return 0;
+	}
+	sqlTableInfo = "select * from " + table->getTableName() + ';';
+
+	sqlite3_exec(db, sqlTableInfo.c_str(), sqliteCallbackRead, table, &errMsg);
+
+	if (errMsg != NULL) {
+		cout << "err msg not null?\n";
 		sqlite3_free(errMsg);
 		return 0;
 	}
 
-	/*cout << "\n\n\n";
-	for (int i = 0; i < table->columns.size(); ++i) {
-		cout << table->columns[i] << ": ";
-		for (int j = 0; j < table->data[i].size(); ++j) {
-
-			cout << table->data[i][j] << ",";
-		}
-		cout << "\n\n";
-	}*/
 	sqlite3_close(db);
 	return 1;
+}
+
+int sqliteCallbackReadTypes(void* table, int count, char** data, char** columns) {
+
+	table_info* ptr = (table_info*)table;
+	int i;
+
+	
+	for (i = 0; i < count; i++) {
+		string typeTest = string(columns[i]);
+
+		if (typeTest == "type") {
+			(*ptr).addColumn(Column());
+			//cout << data[i] << '\n';
+			(*ptr)[ptr->getSize()-1].setColType(string(data[i]));
+		}
+			
+
+	}
+
+	
+
+	return 0;
 }
 
 int handlers_scheduler(handler_info handlers[], char* packetBuffer) {
@@ -176,9 +209,12 @@ int handlers_scheduler(handler_info handlers[], char* packetBuffer) {
 	for (i = 0; i < MAX_HANDLERS; i++) {
 		if (handlers[i].free) {
 			handlers[i].free = false;
+			break;
 		}
 	}
+	
 	if (i == MAX_HANDLERS) {
+		//cout << "is it possible there are no handlers?\n";
 		//No available handlers, return 0
 		return 0;
 	}
