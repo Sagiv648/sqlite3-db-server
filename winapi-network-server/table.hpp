@@ -17,6 +17,7 @@ private:
 	vector<char*> buffers;
 
 	public:
+		
 		table_info(string db,string tName, int transmitionType, int serialNum);
 		table_info();
 		~table_info();

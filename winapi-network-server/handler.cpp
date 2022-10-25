@@ -21,7 +21,7 @@ DWORD mainHandler(void* handlerInput) {
 			if (readTable(&(handler->handlerInput.t)) != 1) {
 				cout << "error occured with reading\n";
 			}
-			handler->handlerInput.p.buildDataPacket(buffer, handler->handlerInput.t);
+			
 			cout << "Data packet is:\n\n";
 			printf("%s\n", buffer);
 			break;
