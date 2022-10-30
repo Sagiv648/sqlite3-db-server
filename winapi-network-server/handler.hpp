@@ -22,6 +22,7 @@ typedef struct {
 
 	packet p;
 	table_info t;
+	SOCKET connected_socket;
 
 
 } handler_input;
@@ -30,7 +31,7 @@ typedef struct {
 	HANDLE hHandler;
 	DWORD threadId;
 	handler_input handlerInput;
-	SOCKET socket;
+	SOCKET serverSocket;
 	bool free;
 
 }handler_info;
@@ -38,7 +39,7 @@ typedef struct {
 
 int setup_handlers(handler_info handlers[], SOCKET serverSocket);
 
-int handlers_scheduler(handler_info handlers[], char* packetBuffer);
+int handlers_scheduler(handler_info handlers[], char* packetBuffer, SOCKET connectedSocket);
 
 int sqliteCallbackRead(void* table, int count, char** colData, char** colName);
 

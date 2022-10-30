@@ -10,18 +10,32 @@ DWORD mainHandler(void* handlerInput) {
 	handler_info* handler = (handler_info*)handlerInput;
 	cout << "this is thread with id " << handler->threadId << "\n\n\n";
 	
+	
+
+
 	// packet class and table_info class are initialized by the recieveHeaderPacket function
 	while (true)
 	{
-		char* buffer = new char[BUFLEN];
+		
+		if (!handler->handlerInput.t.addBuffer(BUFLEN))
+		{
+			cout << "No heap memory\n";
+			break;
+		}
+		char* buffer = handler->handlerInput.t.buffers.back();
 		ZeroMemory(buffer, BUFLEN);
+		
+		
+		
+
+
 		switch (handler->handlerInput.p.transmition_type)
 		{
 		case READ_TABLE:
 			if (readTable(&(handler->handlerInput.t)) != 1) {
 				cout << "error occured with reading\n";
 			}
-			
+			packet::buildDataPacket(buffer, handler->handlerInput.t);
 			cout << "Data packet is:\n\n";
 			printf("%s\n", buffer);
 			break;
@@ -43,6 +57,8 @@ DWORD mainHandler(void* handlerInput) {
 
 		handler->free = true;
 		delete[] buffer;
+		handler->handlerInput.p.~packet();
+		handler->handlerInput.t.~table_info();
 		SuspendThread(handler->hHandler);
 		cout << "thread was suspended but continued here\n";
 		
@@ -57,7 +73,7 @@ int setup_handlers(handler_info handlers[], SOCKET serverSock) {
 
 	for (int i = 0; i < MAX_HANDLERS; i++) {
 		handlers[i].free = true;
-		handlers[i].socket = serverSock;
+		handlers[i].serverSocket = serverSock;
 		
 		handlers[i].hHandler = CreateThread(NULL, 0, mainHandler, (void*)&(handlers[i]), CREATE_SUSPENDED, &(handlers[i].threadId));
 		if (handlers[i].hHandler == NULL) {
@@ -203,7 +219,7 @@ int sqliteCallbackReadTypes(void* table, int count, char** data, char** columns)
 	return 0;
 }
 
-int handlers_scheduler(handler_info handlers[], char* packetBuffer) {
+int handlers_scheduler(handler_info handlers[], char* packetBuffer, SOCKET connectedSocket) {
 
 	int i = 0;
 	for (i = 0; i < MAX_HANDLERS; i++) {
@@ -214,12 +230,12 @@ int handlers_scheduler(handler_info handlers[], char* packetBuffer) {
 	}
 	
 	if (i == MAX_HANDLERS) {
-		//cout << "is it possible there are no handlers?\n";
+		cout << "is it possible there are no handlers?\n";
 		//No available handlers, return 0
 		return 0;
 	}
-
-
+	handlers[i].handlerInput.connected_socket = connectedSocket;
+	printf("Packet buffer is:\n %s\n", packetBuffer);
 	if (packet::recieveHeaderPacket(packetBuffer, handlers[i].handlerInput.t, handlers[i].handlerInput.p) == 0) {
 		cout << "incorrect format\n";
 		return 0;

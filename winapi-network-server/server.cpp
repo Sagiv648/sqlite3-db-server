@@ -28,7 +28,7 @@ SOCKET server_setup(std::map<string, string> varMapping);
 
 handler_info handlers[MAX_HANDLERS];
 
-int main() {
+int main(int argc, char** argv) {
 
 	string test = readFromFile();
 
@@ -62,7 +62,6 @@ int main() {
 	}
 	
 	
-
 	//------------------------------------------------------ test section -------------------------------------------------------------------
 
 	//Actual data packet:
@@ -72,28 +71,38 @@ int main() {
 		%(Column_Name_Placeholder_#2):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
 		%(Column_Name_Placeholder_#N):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
 	}
+	
 */
 	 char dataPacket[] = "{\r\nName:timmy|johnny|kim\r\nAge:16|17|18\r\nClass:Computer science|Engineering|Art\r\n}";
 	 char headerPacket[] = "{\r\nOp_Code:100\r\nPacket_Serial_Num:12345\r\nNext_Packet_Len:673423\r\nTransmition_Type:1\r\nDatabase:test.db\r\nTable_Name:students\r\n}";
 	 char tu[] = "Students";
+	 
 
-	 //Input check to test against inconsistencies in the header packet format.
-	 //Correct format but incorrect info will be handled appropriately
-	 //cout << "before scheduler\n";
-	 handlers_scheduler(handlers, headerPacket);
-	 //cout << "After scheduler\n";
+	 while (true) {
+		 sockaddr connectedAddress;
+		 ZeroMemory(&connectedAddress, sizeof(connectedAddress));
+		 int connectedAddrSize = sizeof(sockaddr);
+		 SOCKET clSocket = accept(serverSocket, &connectedAddress, &connectedAddrSize);
+		 if (clSocket == INVALID_SOCKET) {
+			 cout << "Invalid socket with error: " << WSAGetLastError() << '\n';
+			 continue;
+		 }
+		 char headerBuffer[BUFLEN / 16]; // 4 KiB test
+		 ZeroMemory(headerBuffer, BUFLEN / 16);
+		 while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
+		 
+
+		 
+		 
+
+
+		 
+	 }
+
+
+	 
 	
 	
-	/*
-		HANDLE CreateThread(
-  [in, optional]  LPSECURITY_ATTRIBUTES   lpThreadAttributes,
-  [in]            SIZE_T                  dwStackSize,
-  [in]            LPTHREAD_START_ROUTINE  lpStartAddress,
-  [in, optional]  __drv_aliasesMem LPVOID lpParameter,
-  [in]            DWORD                   dwCreationFlags,
-  [out, optional] LPDWORD                 lpThreadId
-);
-	*/
 
 
 	
@@ -110,8 +119,9 @@ int main() {
 	//	*	8) The sqlite3 handler thread will return to sleep until the main thread will wake it up
 	//	*/
 	//}
+	  
 	
-	 while (true);
+	 
 
 	
 

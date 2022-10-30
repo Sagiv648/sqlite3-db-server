@@ -12,9 +12,9 @@
 
 
 #define PORT 7777
-#define HOST "127.0.0.1"
+#define HOST "192.168.56.1"
 
-#define BUFLEN 1024
+#define BUFLEN 4096
 sockaddr_in address;
 const char buffer[BUFLEN] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 int main() {
@@ -49,9 +49,10 @@ int main() {
 		WSACleanup();
 		return 1;
 	}
-
+	char headerPacket[] = "{\r\nOp_Code:100\r\nPacket_Serial_Num:12345\r\nNext_Packet_Len:673423\r\nTransmition_Type:1\r\nDatabase:test.db\r\nTable_Name:students\r\n}";
+	char tu[] = "Students";
 	int sent;
-	sent = send(clSocket, buffer, BUFLEN, 0);
+	sent = send(clSocket, headerPacket, sizeof(headerPacket), 0);
 	std::cout << "Socket sent " << sent << " bytes\n";
 	
 	if (shutdown(clSocket, SD_SEND) == SOCKET_ERROR)

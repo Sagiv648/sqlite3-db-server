@@ -45,6 +45,8 @@ public:
 	void recieveDataPacket(char* packetBuffer, table_info& tInfo); //^
 
 	
+
+	
 	void setPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType, string dbName, string tableName, bool isDataPacket);
 };
 

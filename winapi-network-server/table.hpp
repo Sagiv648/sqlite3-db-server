@@ -14,10 +14,10 @@ private:
 	int transmition_type;
 	int serial_number;
 	vector<Column> cols;
-	vector<char*> buffers;
+	
 
 	public:
-		
+		vector<char*> buffers;
 		table_info(string db,string tName, int transmitionType, int serialNum);
 		table_info();
 		~table_info();
@@ -33,6 +33,9 @@ private:
 		void setTransmitionType(int transmitType);
 		void setSerialNum(int serialNum);
 		size_t getSize();
+
+		bool addBuffer(size_t bytes);
+		void removeBuffer();
 
 };
 

@@ -60,3 +60,20 @@ size_t table_info::getSize() {
 
 	return cols.size();
 }
+
+bool table_info::addBuffer(size_t bytes) {
+	char* toAppend = nullptr;
+	try {
+		toAppend = new char[bytes];
+	}
+	catch (std::bad_alloc) {
+		return false;
+
+	}
+	buffers.push_back(toAppend);
+	return true;
+}
+void table_info::removeBuffer() {
+	delete[] buffers.back();
+	buffers.pop_back();
+}
