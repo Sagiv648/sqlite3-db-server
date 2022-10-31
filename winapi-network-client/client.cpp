@@ -12,7 +12,7 @@
 
 
 #define PORT 7777
-#define HOST "192.168.56.1"
+#define HOST "10.70.2.140"
 
 #define BUFLEN 4096
 sockaddr_in address;

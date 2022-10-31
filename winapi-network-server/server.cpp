@@ -19,6 +19,7 @@
 
 
 
+#define TEST_ADDR "127.0.0.1"
 
 
 
@@ -165,10 +166,10 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 
 
 
-	/*memset(&address, 0, sizeof(address));
+	memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
 	address.sin_port = htons(PORT);
-	address.sin_addr.S_un.S_addr = inet_addr(HOST);*/
+	address.sin_addr.S_un.S_addr = inet_addr(TEST_ADDR);
 	SOCKET serverSocket = INVALID_SOCKET;
 
 	if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
@@ -180,7 +181,7 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 	std::cout << "Socket created successfully\n";
 
 
-	if (bind(serverSocket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
+	if (bind(serverSocket, result->ai_addr, result->ai_addrlen) == SOCKET_ERROR) {
 		std::cout << "Socket failed to bind with error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
 		WSACleanup();
