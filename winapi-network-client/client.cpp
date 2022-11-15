@@ -12,7 +12,7 @@
 
 
 #define PORT 7777
-#define HOST "10.70.2.140"
+#define HOST "127.0.0.1"
 
 #define BUFLEN 4096
 sockaddr_in address;
@@ -53,6 +53,9 @@ int main() {
 	char tu[] = "Students";
 	int sent;
 	sent = send(clSocket, headerPacket, sizeof(headerPacket), 0);
+	if (sent == SOCKET_ERROR) {
+		std::cout << "Error:" << WSAGetLastError() << '\n';
+	}
 	std::cout << "Socket sent " << sent << " bytes\n";
 	
 	if (shutdown(clSocket, SD_SEND) == SOCKET_ERROR)

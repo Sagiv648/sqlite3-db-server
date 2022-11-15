@@ -83,17 +83,19 @@ int main(int argc, char** argv) {
 		 sockaddr connectedAddress;
 		 ZeroMemory(&connectedAddress, sizeof(connectedAddress));
 		 int connectedAddrSize = sizeof(sockaddr);
-		 SOCKET clSocket = accept(serverSocket, &connectedAddress, &connectedAddrSize);
+		 char headerBuffer[BUFLEN / 16]; // 4 KiB test
+		 ZeroMemory(headerBuffer, BUFLEN / 16);
+		 int recved = 0;
+		 int total = 0;
+		 SOCKET clSocket = accept(serverSocket, NULL, NULL);
 		 if (clSocket == INVALID_SOCKET) {
 			 cout << "Invalid socket with error: " << WSAGetLastError() << '\n';
 			 continue;
 		 }
-		 char headerBuffer[BUFLEN / 16]; // 4 KiB test
-		 ZeroMemory(headerBuffer, BUFLEN / 16);
+		 
 		 while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
 		 
 
-		 
 		 
 
 
@@ -181,7 +183,7 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 	std::cout << "Socket created successfully\n";
 
 
-	if (bind(serverSocket, result->ai_addr, result->ai_addrlen) == SOCKET_ERROR) {
+	if (bind(serverSocket, (sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
 		std::cout << "Socket failed to bind with error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
 		WSACleanup();
