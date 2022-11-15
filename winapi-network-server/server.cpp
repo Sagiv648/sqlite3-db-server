@@ -20,20 +20,26 @@
 
 
 #define TEST_ADDR "127.0.0.1"
-
-
+#define TEST_PORT 7777
+#define TEST_PORT_STR "7777"
 
 sockaddr_in address;
 
-SOCKET server_setup(std::map<string, string> varMapping);
+SOCKET server_setup(int port, char* addr );
 
 handler_info handlers[MAX_HANDLERS];
 
 int main(int argc, char** argv) {
 
-	string test = readFromFile();
+	if (argc != 3)
+	{
+		cout << "ERROR: Only 2 parameters, port and address.\n";
+		ExitProcess(1);
+	}
 
-	if (test == "") {
+	//string test = readFromFile();
+
+	/*if (test == "") {
 		ExitProcess(1);
 	}
 	
@@ -41,11 +47,11 @@ int main(int argc, char** argv) {
 	
 	if (varMapping.size() == 0) {
 		ExitProcess(1);
-	}
+	}*/
+	
 
 
-
-	SOCKET serverSocket = server_setup(varMapping);
+	SOCKET serverSocket = server_setup(atoi(argv[1]), argv[2]);
 	
 	if (serverSocket == INVALID_SOCKET) {
 		ExitProcess(1);
@@ -90,7 +96,11 @@ int main(int argc, char** argv) {
 		 }
 		 char headerBuffer[BUFLEN / 16]; // 4 KiB test
 		 ZeroMemory(headerBuffer, BUFLEN / 16);
-		 while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
+		 if (recv(clSocket, headerBuffer, BUFLEN / 16, 0) > 0) {
+			 printf("buffer is:\n%s\n", headerBuffer);
+			 break;
+		 } 
+		 //while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
 		 
 
 		 
@@ -131,18 +141,18 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
-SOCKET server_setup(std::map<string,string> varMapping) {
+SOCKET server_setup(int port, char* addr) {
 
-	int PORT = std::stoi(varMapping["PORT"]);
+	//int PORT = std::stoi(varMapping["PORT"]);
 
-	char HOST[16]; //purely to conform to how the api accepts only char* string types
+	//char HOST[16]; //purely to conform to how the api accepts only char* string types
 
-	ZeroMemory(HOST, sizeof(HOST));
-	size_t t = 0;
-	for (t = 0; t < varMapping["HOST"].size(); ++t) {
-		HOST[t] = varMapping["HOST"][t];
-	}
-	HOST[t] = 0;
+	//ZeroMemory(HOST, sizeof(HOST));
+	//size_t t = 0;
+	//for (t = 0; t < varMapping["HOST"].size(); ++t) {
+	//	HOST[t] = varMapping["HOST"][t];
+	//}
+	//HOST[t] = 0;
 
 	WSADATA sockInitData;
 
@@ -159,7 +169,11 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 	//cout << varMapping["PORT"] << '\n';
-	if (getaddrinfo(NULL, varMapping["PORT"].c_str(), &hints, &result) != 0) {
+	char buffer[7];
+	_itoa_s(port, buffer, 10);
+	buffer[strlen(buffer)] = 0;
+	
+	if (getaddrinfo(NULL, buffer, &hints, &result) != 0) {
 		cout << "error with getaddrinfo with error " << WSAGetLastError();
 		ExitProcess(1);
 	}
@@ -168,8 +182,8 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 
 	memset(&address, 0, sizeof(address));
 	address.sin_family = AF_INET;
-	address.sin_port = htons(PORT);
-	address.sin_addr.S_un.S_addr = inet_addr(TEST_ADDR);
+	address.sin_port = htons(port);
+	address.sin_addr.S_un.S_addr = inet_addr(addr);
 	SOCKET serverSocket = INVALID_SOCKET;
 
 	if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
@@ -180,8 +194,9 @@ SOCKET server_setup(std::map<string,string> varMapping) {
 
 	std::cout << "Socket created successfully\n";
 
-
-	if (bind(serverSocket, result->ai_addr, result->ai_addrlen) == SOCKET_ERROR) {
+	//bind(serverSocket, result->ai_addr, result->ai_addrlen) - automatic -> 0.0.0.0
+	//bind(serverSocket, (sockaddr*)&address, sizeof(address)) - manual -> in that case 127.0.0.1
+	if (bind(serverSocket, (sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
 		std::cout << "Socket failed to bind with error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
 		WSACleanup();

@@ -2,7 +2,6 @@
 #include "utils.hpp"
 
 
-
 string readFromFile() {
 
 	
@@ -114,3 +113,4 @@ int stringToNum(string str) {
 
 	return output;
 }
+
