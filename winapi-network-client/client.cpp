@@ -53,6 +53,9 @@ int main() {
 	char tu[] = "Students";
 	int sent;
 	sent = send(clSocket, headerPacket, sizeof(headerPacket), 0);
+	if (sent == SOCKET_ERROR) {
+		std::cout << "Error:" << WSAGetLastError() << '\n';
+	}
 	std::cout << "Socket sent " << sent << " bytes\n";
 	
 	if (shutdown(clSocket, SD_SEND) == SOCKET_ERROR)
