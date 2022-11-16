@@ -98,8 +98,9 @@ int main(int argc, char** argv) {
 		 ZeroMemory(headerBuffer, BUFLEN / 16);
 		 if (recv(clSocket, headerBuffer, BUFLEN / 16, 0) > 0) {
 			 printf("buffer is:\n%s\n", headerBuffer);
-			 break;
+			 ZeroMemory(headerBuffer, BUFLEN / 16);
 		 } 
+		 
 		 //while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
 		 
 
