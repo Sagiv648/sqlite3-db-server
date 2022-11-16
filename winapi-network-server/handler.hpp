@@ -27,14 +27,30 @@ typedef struct {
 
 } handler_input;
 
-typedef struct {
+ struct handler_info {
 	HANDLE hHandler;
 	DWORD threadId;
 	handler_input handlerInput;
 	SOCKET serverSocket;
 	bool free;
 
-}handler_info;
+	handler_info(HANDLE handle, DWORD tId, handler_input input, SOCKET servSocket, bool isFree) {
+		hHandler = handle;
+		threadId = tId;
+		handlerInput = input;
+		serverSocket = servSocket;
+		free = isFree;
+	}
+	handler_info() {
+		hHandler = 0;
+		threadId = 0;
+		serverSocket = 0;
+		free = false;
+
+	}
+	
+
+};
 
 
 int setup_handlers(handler_info handlers[], SOCKET serverSocket);
