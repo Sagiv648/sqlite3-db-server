@@ -98,10 +98,9 @@ int main(int argc, char** argv) {
 			 cout << "Invalid socket with error: " << WSAGetLastError() << '\n';
 			 continue;
 		 }
-<<<<<<< HEAD
 		 
 		 while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
-=======
+
 		 char headerBuffer[BUFLEN / 16]; // 4 KiB test
 		 ZeroMemory(headerBuffer, BUFLEN / 16);
 		 if (recv(clSocket, headerBuffer, BUFLEN / 16, 0) > 0) {
@@ -109,7 +108,7 @@ int main(int argc, char** argv) {
 			 break;
 		 } 
 		 //while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
->>>>>>> f1baf717121e68c62d5cf187e80281e5b3ce8d3f
+
 		 
 
 		 
@@ -202,12 +201,12 @@ SOCKET server_setup(int port, char* addr) {
 
 	std::cout << "Socket created successfully\n";
 
-<<<<<<< HEAD
 
-=======
+
+
 	//bind(serverSocket, result->ai_addr, result->ai_addrlen) - automatic -> 0.0.0.0
 	//bind(serverSocket, (sockaddr*)&address, sizeof(address)) - manual -> in that case 127.0.0.1
->>>>>>> f1baf717121e68c62d5cf187e80281e5b3ce8d3f
+
 	if (bind(serverSocket, (sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
 		std::cout << "Socket failed to bind with error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
