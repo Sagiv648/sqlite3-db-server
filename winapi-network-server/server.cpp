@@ -27,6 +27,8 @@ sockaddr_in address;
 
 SOCKET server_setup(int port, char* addr );
 
+void writeToFileTest(char* buffer);
+
 handler_info handlers[MAX_HANDLERS];
 
 int main(int argc, char** argv) {
@@ -36,20 +38,6 @@ int main(int argc, char** argv) {
 		cout << "ERROR: Only 2 parameters, port and address.\n";
 		ExitProcess(1);
 	}
-
-	//string test = readFromFile();
-
-	/*if (test == "") {
-		ExitProcess(1);
-	}
-	
-	std::map<string,string> varMapping = parseFromFile(test);
-	
-	if (varMapping.size() == 0) {
-		ExitProcess(1);
-	}*/
-	
-
 
 	SOCKET serverSocket = server_setup(atoi(argv[1]), argv[2]);
 	
@@ -84,12 +72,11 @@ int main(int argc, char** argv) {
 	 char headerPacket[] = "{\r\nOp_Code:100\r\nPacket_Serial_Num:12345\r\nNext_Packet_Len:673423\r\nTransmition_Type:1\r\nDatabase:test.db\r\nTable_Name:students\r\n}";
 	 char tu[] = "Students";
 	 
-
+	 char headerBuffer[BUFLEN / 16];
 	 while (true) {
 		 sockaddr connectedAddress;
 		 ZeroMemory(&connectedAddress, sizeof(connectedAddress));
 		 int connectedAddrSize = sizeof(sockaddr);
-		 char headerBuffer[BUFLEN / 16]; // 4 KiB test
 		 ZeroMemory(headerBuffer, BUFLEN / 16);
 		 int recved = 0;
 		 int total = 0;
@@ -98,15 +85,22 @@ int main(int argc, char** argv) {
 			 cout << "Invalid socket with error: " << WSAGetLastError() << '\n';
 			 continue;
 		 }
-		 
-		 while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
 
-		 char headerBuffer[BUFLEN / 16]; // 4 KiB test
-		 ZeroMemory(headerBuffer, BUFLEN / 16);
-		 if (recv(clSocket, headerBuffer, BUFLEN / 16, 0) > 0) {
-			 printf("buffer is:\n%s\n", headerBuffer);
-			 break;
+		 
+
+		  // 4 KiB test
+		 int len = 0;
+		 if ((len = recv(clSocket, headerBuffer, BUFLEN / 16, 0)) > 0) {
+			 if (len < BUFLEN / 16 - 1) { 
+				 headerBuffer[len] = 0;
+				 writeToFileTest(headerBuffer);
+				//printf("buffer is:\n%s\n", headerBuffer);
+
+			 }
+			
+			 //ZeroMemory(headerBuffer, BUFLEN / 16);
 		 } 
+		 while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
 		 //while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
 
 		 
@@ -146,6 +140,21 @@ int main(int argc, char** argv) {
 	closesocket(serverSocket);
 	WSACleanup();
 	return 0;
+}
+
+void writeToFileTest(char* buffer) {
+
+	HANDLE file = CreateFileA("test.txt", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file == INVALID_HANDLE_VALUE) {
+		cout << "Error while opening file " << GetLastError() << '\n';
+		ExitProcess(1);
+	}
+	DWORD numWritten;
+	if (WriteFile(file, buffer, strlen(buffer), &numWritten, NULL) == 0) {
+		cout << "Error while writing " << GetLastError() << '\n';
+		ExitProcess(1);
+	}
+
 }
 
 SOCKET server_setup(int port, char* addr) {
