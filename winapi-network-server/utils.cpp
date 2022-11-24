@@ -114,3 +114,104 @@ int stringToNum(string str) {
 	return output;
 }
 
+
+
+void parseArguments(char** args, int count, EntryArguments* pEntryArgs) {
+
+	// -p 7777 -addr 127.0.0.1
+
+	vector<string> vecArgs = vector<string>();
+	int i = 1;
+	for (; i < count; i++) {
+		vecArgs.push_back(args[i]);
+	}
+	if (vecArgs.size() < 2 || vecArgs.size() > 4 || vecArgs[0] != "-p" || !isNumeric(vecArgs[1])) {
+		std::cout << "Mandatory parameter is -p(port) and has to be numeric, -addr will default to 0.0.0.0\n";
+		ExitProcess(0);
+	}
+	stringstream ss = stringstream();
+	unsigned long testNumeric = 0;
+	ss << vecArgs[1];
+	ss >> testNumeric;
+	if (testNumeric < 1024 || testNumeric > UINT16_MAX) {
+		cout << "Invalid port number " << testNumeric << '\n';
+		ExitProcess(0);
+	}
+	pEntryArgs->port = (unsigned short)testNumeric;
+	if (vecArgs.size() == 2)
+	{
+		pEntryArgs->isAutomatic = true;
+		pEntryArgs->ipv4 = 0;
+	}
+	else if(vecArgs.size() == 4) {
+		pEntryArgs->isAutomatic = false;
+		getIpv4(vecArgs[3], &(pEntryArgs->ipv4));
+		if (pEntryArgs->ipv4 == ULONG_MAX)
+		{
+			cout << "Invalid address " << vecArgs[3] << '\n';
+			ExitProcess(0);
+		}
+	}
+	
+}
+
+bool isNumeric(string str) {
+
+	for (auto c : str) {
+		if (c < '0' || c > '9')
+			return false;
+	}
+	return true;
+}
+
+void getIpv4(string ipv4, unsigned long* outIp) {
+
+	vector<unsigned char> ip_addr = vector<unsigned char>();
+	char* nextToken = NULL;
+	char* ptr = strtok_s((char*)ipv4.c_str(), ".", &nextToken);
+	stringstream ss = stringstream();
+	unsigned long test = 0;
+	while (ptr) {
+		if (!isNumeric(string(ptr))) {
+			*outIp = ULONG_MAX;
+			return;
+
+		}
+		ss << string(ptr);
+		ss >> test;
+		if (test < 0 || test > UCHAR_MAX)
+		{
+			*outIp = ULONG_MAX;
+			return;
+		}
+		ip_addr.push_back((unsigned char)test);
+		
+		ptr = strtok_s(NULL, ".", &nextToken);
+	
+	}
+
+	*outIp = getDecimalIp(ip_addr);
+
+	
+}
+
+unsigned long getDecimalIp(vector <unsigned char> ipAddr) {
+	
+	
+	if (ipAddr.size() < 4)
+		return ULONG_MAX;
+		
+
+	unsigned long long output = 0;
+	unsigned char offset = 8;
+
+	for (auto uc : ipAddr) {
+		output = output << offset;
+		output |= (unsigned long long)uc;
+	}
+
+
+
+	
+	return (unsigned long)output;
+}

@@ -26,9 +26,22 @@ string numToString(long long num);
 int stringToNum(string str);
 
 
+typedef struct EntryArguments {
+	unsigned short port;
+	bool isAutomatic;
+	unsigned long ipv4;
+} EntryArguments;
 
 
 
 
+
+void parseArguments(char** args, int count, EntryArguments* pEntryArgs);
+
+bool isNumeric(string str);
+
+void getIpv4(string ipv4, unsigned long* outIp);
+
+unsigned long getDecimalIp(vector <unsigned char> ipAddr);
 
 #endif // !_UTILS_H_

@@ -25,21 +25,24 @@
 
 sockaddr_in address;
 
-SOCKET server_setup(int port, char* addr );
+SOCKET server_setup(unsigned short port, unsigned long addr );
 
 void writeToFileTest(char* buffer);
 
 handler_info handlers[MAX_HANDLERS];
 
+
+EntryArguments args;
+
 int main(int argc, char** argv) {
 
-	if (argc != 3)
-	{
-		cout << "ERROR: Only 2 parameters, port and address.\n";
-		ExitProcess(1);
-	}
 
-	SOCKET serverSocket = server_setup(atoi(argv[1]), argv[2]);
+	memset(&args, 0, sizeof(args));
+
+	parseArguments(argv, argc, &args);
+
+
+	SOCKET serverSocket = server_setup(args.port, args.ipv4);
 	
 	if (serverSocket == INVALID_SOCKET) {
 		ExitProcess(1);
@@ -157,7 +160,7 @@ void writeToFileTest(char* buffer) {
 
 }
 
-SOCKET server_setup(int port, char* addr) {
+SOCKET server_setup(unsigned short port, unsigned long addr) {
 
 	//int PORT = std::stoi(varMapping["PORT"]);
 
@@ -177,29 +180,44 @@ SOCKET server_setup(int port, char* addr) {
 		WSACleanup();
 		return INVALID_SOCKET;
 	}
-
-	struct addrinfo* result = NULL, * ptr = NULL, hints;
-	ZeroMemory(&hints, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_protocol = IPPROTO_TCP;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-	//cout << varMapping["PORT"] << '\n';
-	char buffer[7];
-	_itoa_s(port, buffer, 10);
-	buffer[strlen(buffer)] = 0;
 	
-	if (getaddrinfo(NULL, buffer, &hints, &result) != 0) {
-		cout << "error with getaddrinfo with error " << WSAGetLastError();
-		ExitProcess(1);
+	
+	struct addrinfo* result = NULL, * ptr = NULL, hints;
+	if (args.isAutomatic) {
+
+		
+		ZeroMemory(&hints, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_flags = AI_PASSIVE;
+		
+		char buffer[7];
+		_itoa_s(port, buffer, 10);
+		buffer[strlen(buffer)] = 0;
+
+		if (getaddrinfo(NULL, buffer, &hints, &result) != 0) {
+			cout << "error with getaddrinfo with error " << WSAGetLastError();
+			ExitProcess(1);
+		}
+		
 	}
+	else {
+		memset(&address, 0, sizeof(address));
+		address.sin_family = AF_INET;
+		address.sin_port = htons(port);
+		address.sin_addr.S_un.S_addr = htonl(addr);
+
+	}
+	
+	
+	
+	
+		
+
+	
 
 
-
-	memset(&address, 0, sizeof(address));
-	address.sin_family = AF_INET;
-	address.sin_port = htons(port);
-	address.sin_addr.S_un.S_addr = inet_addr(addr);
 	SOCKET serverSocket = INVALID_SOCKET;
 
 	if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
@@ -207,7 +225,6 @@ SOCKET server_setup(int port, char* addr) {
 		WSACleanup();
 		return INVALID_SOCKET;
 	}
-
 	std::cout << "Socket created successfully\n";
 
 
@@ -216,13 +233,14 @@ SOCKET server_setup(int port, char* addr) {
 	//bind(serverSocket, result->ai_addr, result->ai_addrlen) - automatic -> 0.0.0.0
 	//bind(serverSocket, (sockaddr*)&address, sizeof(address)) - manual -> in that case 127.0.0.1
 
-	if (bind(serverSocket, (sockaddr*)&address, sizeof(address)) == SOCKET_ERROR) {
+	if (bind(serverSocket, args.isAutomatic ? result->ai_addr : (sockaddr*)&address, 
+		args.isAutomatic ?  result->ai_addrlen :  sizeof(address)) == SOCKET_ERROR) {
 		std::cout << "Socket failed to bind with error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
 		WSACleanup();
 		return INVALID_SOCKET;
 	}
-	std::cout << "Socket bound successfully\n";
+	std::cout << "Socket bound successfully to decimal address: " << args.ipv4 << '\n';
 
 
 	if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR) {
