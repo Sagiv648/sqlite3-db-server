@@ -24,11 +24,11 @@ DWORD mainHandler(void* handlerInput) {
 		}
 		char* buffer = handler->handlerInput.t.buffers.back();
 		ZeroMemory(buffer, BUFLEN);
-		
-		
-		
-
-
+		char headerBuffer[512];
+		ZeroMemory(headerBuffer, sizeof(headerBuffer));
+		packet p = packet(SERVER_SENDER, 1, 0, READ_TABLE, handler->handlerInput.t.getDbName(), handler->handlerInput.t.getTableName(), false);
+		int bytesSent = 0;
+		int total = 0;
 		switch (handler->handlerInput.p.transmition_type)
 		{
 		case READ_TABLE:
@@ -36,8 +36,27 @@ DWORD mainHandler(void* handlerInput) {
 				cout << "error occured with reading\n";
 			}
 			packet::buildDataPacket(buffer, handler->handlerInput.t);
-			cout << "Data packet is:\n\n";
-			printf("%s\n", buffer);
+			p.next_packet_length = handler->handlerInput.t.getByteSz()[0];
+			p.buildHeaderPacket(headerBuffer);
+
+			
+			while ((bytesSent = send(handler->handlerInput.connected_socket, headerBuffer, strlen(headerBuffer), 0)) != SOCKET_ERROR) {
+				total += bytesSent;
+			}
+			if (bytesSent == SOCKET_ERROR) {
+				cout << "Failed to send header packet with winsocket error " << WSAGetLastError() << '\n';
+				break;
+			}
+			total = 0;
+			while ((bytesSent = send(handler->handlerInput.connected_socket, buffer, BUFLEN, 0) != SOCKET_ERROR)) {
+				total += bytesSent;
+			}
+			if (bytesSent == SOCKET_ERROR) {
+				cout << "Failed to send data packet with winsocket error " << WSAGetLastError() << '\n';
+				break;
+			}
+			cout << "Data packet sent.\n\n";
+			
 			break;
 		case WRITE_TABLE:
 			if (writeTable(&(handler->handlerInput.t)) != 1) {
@@ -55,10 +74,11 @@ DWORD mainHandler(void* handlerInput) {
 		//Once all the functions have finished their work successfully the handler will send the data packet over the network
 		// or will send nothing incase a "dirty" page was written back
 
-		handler->free = true;
+		
 		delete[] buffer;
 		handler->handlerInput.p.~packet();
 		handler->handlerInput.t.~table_info();
+		handler->free = true;
 		SuspendThread(handler->hHandler);
 		cout << "thread was suspended but continued here\n";
 		
@@ -97,6 +117,7 @@ int sqliteCallbackRead(void* table, int count, char** data, char** columns) {
 			totalCols--;
 		}
 		(*ptr)[i].addData(string(data[i]));
+		
 		
 
 
@@ -208,6 +229,7 @@ int sqliteCallbackReadTypes(void* table, int count, char** data, char** columns)
 		if (typeTest == "type") {
 			(*ptr).addColumn(Column());
 			//cout << data[i] << '\n';
+			
 			(*ptr)[ptr->getSize()-1].setColType(string(data[i]));
 		}
 			
@@ -234,10 +256,12 @@ int handlers_scheduler(handler_info handlers[], char* packetBuffer, SOCKET conne
 		//No available handlers, return 0
 		return 0;
 	}
+
 	handlers[i].handlerInput.connected_socket = connectedSocket;
-	printf("Packet buffer is:\n %s\n", packetBuffer);
+	printf("Packet buffer from the client is:\n %s\n", packetBuffer);
 	if (packet::recieveHeaderPacket(packetBuffer, handlers[i].handlerInput.t, handlers[i].handlerInput.p) == 0) {
-		cout << "incorrect format\n";
+		handlers[i].free = true;
+		cout << "incorrect client format, packed dumped.\n";
 		return 0;
 	}
 	else {

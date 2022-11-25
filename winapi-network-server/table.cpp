@@ -9,11 +9,13 @@ table_info::table_info(string db, string tName, int transmitionType, int serialN
 table_info::table_info() {
 	table_info::serial_number = 0;
 	table_info::transmition_type = 0;
+	
 }
 table_info::~table_info() {
 	cols.clear();
 	name.clear();
 	database.clear();
+	clearBuffers();
 	
 	
 	
@@ -61,6 +63,27 @@ size_t table_info::getSize() {
 	return cols.size();
 }
 
+void table_info::incByteSz() {
+	if (sz.empty())
+		sz.push_back(1);
+	if (sz[sz.size() - 1] % ULLONG_MAX == 0)
+		sz.push_back(1);
+	sz[sz.size() - 1]++;
+}
+void table_info::incByteSz(size_t bytes) {
+	if (sz.empty())
+		sz.push_back(1);
+	if (sz[sz.size() - 1] + bytes >= ULLONG_MAX) {
+		sz.push_back(1);
+		
+	}
+	sz[sz.size() - 1] += bytes;
+}
+vector<size_t> table_info::getByteSz() {
+
+	return sz;
+}
+
 bool table_info::addBuffer(size_t bytes) {
 	char* toAppend = nullptr;
 	try {
@@ -76,4 +99,12 @@ bool table_info::addBuffer(size_t bytes) {
 void table_info::removeBuffer() {
 	delete[] buffers.back();
 	buffers.pop_back();
+}
+void table_info::clearBuffers() {
+	
+	for (auto buf : buffers) {
+		delete[] buf;
+		buf = nullptr;
+	}
+	buffers.clear();
 }

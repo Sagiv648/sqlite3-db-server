@@ -166,12 +166,14 @@ bool isNumeric(string str) {
 
 void getIpv4(string ipv4, unsigned long* outIp) {
 
-	vector<unsigned char> ip_addr = vector<unsigned char>();
+	vector<unsigned long> ip_addr = vector<unsigned long>();
 	char* nextToken = NULL;
 	char* ptr = strtok_s((char*)ipv4.c_str(), ".", &nextToken);
 	stringstream ss = stringstream();
 	unsigned long test = 0;
 	while (ptr) {
+		
+		
 		if (!isNumeric(string(ptr))) {
 			*outIp = ULONG_MAX;
 			return;
@@ -179,23 +181,26 @@ void getIpv4(string ipv4, unsigned long* outIp) {
 		}
 		ss << string(ptr);
 		ss >> test;
+		ss.clear();
+		
 		if (test < 0 || test > UCHAR_MAX)
 		{
 			*outIp = ULONG_MAX;
 			return;
 		}
-		ip_addr.push_back((unsigned char)test);
+		ip_addr.push_back(test);
+		test = 0;
 		
 		ptr = strtok_s(NULL, ".", &nextToken);
 	
 	}
-
+	
 	*outIp = getDecimalIp(ip_addr);
 
 	
 }
 
-unsigned long getDecimalIp(vector <unsigned char> ipAddr) {
+unsigned long getDecimalIp(vector <unsigned long> ipAddr) {
 	
 	
 	if (ipAddr.size() < 4)
@@ -210,8 +215,5 @@ unsigned long getDecimalIp(vector <unsigned char> ipAddr) {
 		output |= (unsigned long long)uc;
 	}
 
-
-
-	
 	return (unsigned long)output;
 }

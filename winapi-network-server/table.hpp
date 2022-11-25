@@ -14,7 +14,7 @@ private:
 	int transmition_type;
 	int serial_number;
 	vector<Column> cols;
-	
+	vector<size_t> sz;
 
 	public:
 		vector<char*> buffers;
@@ -34,8 +34,12 @@ private:
 		void setSerialNum(int serialNum);
 		size_t getSize();
 
+		void incByteSz();
+		void incByteSz(size_t bytes);
+		vector<size_t> getByteSz();
 		bool addBuffer(size_t bytes);
 		void removeBuffer();
+		void clearBuffers();
 
 };
 

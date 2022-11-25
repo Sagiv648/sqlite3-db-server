@@ -16,7 +16,7 @@
 
 #define BUFLEN 4096
 sockaddr_in address;
-const char buffer[BUFLEN] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+const char buffer1[BUFLEN] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 int main() {
 
 	WSADATA sockInitData;
@@ -58,6 +58,32 @@ int main() {
 	}
 	std::cout << "Socket sent " << sent << " bytes\n";
 	
+	char buffer[BUFLEN];
+	ZeroMemory(buffer, sizeof(buffer));
+	int recieved = 0;
+	int total = 0;
+	recieved = recv(clSocket, buffer, BUFLEN, 0);
+
+	/*while ((recieved = recv(clSocket, buffer, BUFLEN, 0)) != SOCKET_ERROR) {
+		total += recieved;
+	}*/
+
+	if (recieved != SOCKET_ERROR) {
+		buffer[BUFLEN - 1] = 0;
+		printf("The header recieved is:\n %s\n", buffer);
+	}
+	ZeroMemory(buffer, sizeof(buffer));
+	total = 0;
+	while ((recieved = recv(clSocket, buffer, BUFLEN, 0)) != SOCKET_ERROR) {
+		total += recieved;
+
+	}
+	if (recieved != SOCKET_ERROR) {
+		buffer[BUFLEN - 1] = 0;
+		printf("The data recieved is:\n %s\n", buffer);
+	}
+
+
 	if (shutdown(clSocket, SD_SEND) == SOCKET_ERROR)
 	{
 		std::cout << "Socket failed to shutdown with error " << WSAGetLastError() << '\n';

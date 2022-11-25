@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 		 int total = 0;
 		 SOCKET clSocket = accept(serverSocket, NULL, NULL);
 		 if (clSocket == INVALID_SOCKET) {
-			 cout << "Invalid socket with error: " << WSAGetLastError() << '\n';
+			 cout << "Invalid client connection with winsocket error: " << WSAGetLastError() << '\n';
 			 continue;
 		 }
 
@@ -157,26 +157,15 @@ void writeToFileTest(char* buffer) {
 		cout << "Error while writing " << GetLastError() << '\n';
 		ExitProcess(1);
 	}
-
+	CloseHandle(file);
 }
 
 SOCKET server_setup(unsigned short port, unsigned long addr) {
 
-	//int PORT = std::stoi(varMapping["PORT"]);
-
-	//char HOST[16]; //purely to conform to how the api accepts only char* string types
-
-	//ZeroMemory(HOST, sizeof(HOST));
-	//size_t t = 0;
-	//for (t = 0; t < varMapping["HOST"].size(); ++t) {
-	//	HOST[t] = varMapping["HOST"][t];
-	//}
-	//HOST[t] = 0;
-
 	WSADATA sockInitData;
 
 	if (WSAStartup(MAKEWORD(2, 2), &sockInitData) != 0) {
-		std::cout << "Sock init failed with error " << WSAGetLastError() << '\n';
+		std::cout << "Server init failed with winsocket error " << WSAGetLastError() << '\n';
 		WSACleanup();
 		return INVALID_SOCKET;
 	}
@@ -197,7 +186,7 @@ SOCKET server_setup(unsigned short port, unsigned long addr) {
 		buffer[strlen(buffer)] = 0;
 
 		if (getaddrinfo(NULL, buffer, &hints, &result) != 0) {
-			cout << "error with getaddrinfo with error " << WSAGetLastError();
+			cout << "Error with automatic addressing with winsocket error " << WSAGetLastError();
 			ExitProcess(1);
 		}
 		
@@ -221,36 +210,32 @@ SOCKET server_setup(unsigned short port, unsigned long addr) {
 	SOCKET serverSocket = INVALID_SOCKET;
 
 	if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
-		std::cout << "Socket creation failed with error " << WSAGetLastError() << '\n';
+		std::cout << "Server creation failed with winsocket error " << WSAGetLastError() << '\n';
 		WSACleanup();
 		return INVALID_SOCKET;
 	}
-	std::cout << "Socket created successfully\n";
+	std::cout << "Server created successfully\n";
 
 
-
-
-	//bind(serverSocket, result->ai_addr, result->ai_addrlen) - automatic -> 0.0.0.0
-	//bind(serverSocket, (sockaddr*)&address, sizeof(address)) - manual -> in that case 127.0.0.1
 
 	if (bind(serverSocket, args.isAutomatic ? result->ai_addr : (sockaddr*)&address, 
-		args.isAutomatic ?  result->ai_addrlen :  sizeof(address)) == SOCKET_ERROR) {
-		std::cout << "Socket failed to bind with error " << WSAGetLastError() << '\n';
+		args.isAutomatic ?  result->ai_addrlen :  (size_t)sizeof(address)) == SOCKET_ERROR) {
+		std::cout << "Server failed to bind with winsocket error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
 		WSACleanup();
 		return INVALID_SOCKET;
 	}
-	std::cout << "Socket bound successfully to decimal address: " << args.ipv4 << '\n';
+	
 
 
 	if (listen(serverSocket, SOMAXCONN) == SOCKET_ERROR) {
-		std::cout << "Socket failed to listen with error " << WSAGetLastError() << '\n';
+		std::cout << "Server failed to listen with winsocket error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
 		WSACleanup();
 
 		return INVALID_SOCKET;
 	}
-	std::cout << "Socket listening successfully\n";
+	std::cout << "Server is up and running.\n";
 
 	return serverSocket;
 }

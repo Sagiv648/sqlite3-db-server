@@ -34,17 +34,26 @@ void packet::setPacket(char opcode, int serialNum, size_t nextPacketLen, char tr
 	packet::is_Data_Packet = isDataPacket;
 }
 
-void packet::buildHeaderPacket(char* packetBuffer) {
+size_t packet::buildHeaderPacket(char* packetBuffer) {
 
 	string buffer = string("");
+	stringstream ss = stringstream();
 	buffer += "{\r\n";
-	buffer += "Op_Code: " + numToString( packet::op_code);
+	ss << packet::op_code;
+	
+	buffer += "Op_Code: " + ss.str();
 	buffer += "\r\n";
-	buffer += "Packet_Serial_Num: " + numToString( packet::serial_number);
+	ss.str("");
+	ss << packet::serial_number;
+	buffer += "Packet_Serial_Num: " + ss.str();
 	buffer += "\r\n";
-	buffer += "Next_Packet_Len: " + numToString( packet::next_packet_length);
+	ss.str("");
+	ss << packet::next_packet_length;
+	buffer += "Next_Packet_Len: " + ss.str();
 	buffer += "\r\n";
-	buffer += "Transmition_Type: " + numToString( packet::transmition_type);
+	ss.str("");
+	ss << packet::transmition_type;
+	buffer += "Transmition_Type: " + ss.str();
 	buffer += "\r\n";
 	buffer += "Database: " + packet::db_name;
 	buffer += "\r\n}";
@@ -53,6 +62,7 @@ void packet::buildHeaderPacket(char* packetBuffer) {
 	const char* tmp = buffer.c_str();
 	memcpy(packetBuffer, tmp, strlen(tmp));
 	packetBuffer[buffer.size()] = 0;
+	return buffer.size();
 	
 }
 
@@ -162,7 +172,7 @@ void packet::buildDataPacket(char* packetBuffer, table_info& tInfo) {
 	}
 	
 	buffer += '}';
-	
+	tInfo.incByteSz(buffer.size());
 	const char* tmp = buffer.c_str();
 	memcpy(packetBuffer, tmp, strlen(tmp));
 	packetBuffer[buffer.size()] = 0;

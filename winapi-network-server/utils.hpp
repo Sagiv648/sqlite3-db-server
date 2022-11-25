@@ -22,8 +22,8 @@ string readFromFile();
 std::map<string,string> parseFromFile(string);
 
 
-string numToString(long long num);
-int stringToNum(string str);
+//string numToString(long long num);
+//int stringToNum(string str);
 
 
 typedef struct EntryArguments {
@@ -42,6 +42,6 @@ bool isNumeric(string str);
 
 void getIpv4(string ipv4, unsigned long* outIp);
 
-unsigned long getDecimalIp(vector <unsigned char> ipAddr);
+unsigned long getDecimalIp(vector <unsigned long> ipAddr);
 
 #endif // !_UTILS_H_
