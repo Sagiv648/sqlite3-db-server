@@ -55,7 +55,7 @@ typedef struct {
 
 int setup_handlers(handler_info handlers[], SOCKET serverSocket);
 
-int handlers_scheduler(handler_info handlers[], char* packetBuffer, SOCKET connectedSocket);
+int handlers_scheduler(handler_info handlers[], std::queue<SOCKET>& clientsQueue);
 
 int sqliteCallbackRead(void* table, int count, char** colData, char** colName);
 

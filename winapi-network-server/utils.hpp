@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <queue>
 
 using std::string;
 using std::vector;

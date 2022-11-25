@@ -41,7 +41,7 @@ public:
 
 	size_t buildHeaderPacket(char* packetBuffer); //^
 	static int recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p); //^
-	static void buildDataPacket(char* packetBuffer, table_info& tInfo); //^
+	static void buildDataPacket(table_info& tInfo); //^
 	void recieveDataPacket(char* packetBuffer, table_info& tInfo); //^
 
 	

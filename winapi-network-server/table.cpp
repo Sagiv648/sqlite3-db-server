@@ -64,27 +64,21 @@ size_t table_info::getSize() {
 }
 
 void table_info::incByteSz() {
-	if (sz.empty())
-		sz.push_back(1);
-	if (sz[sz.size() - 1] % ULLONG_MAX == 0)
-		sz.push_back(1);
-	sz[sz.size() - 1]++;
+	sz++;
 }
 void table_info::incByteSz(size_t bytes) {
-	if (sz.empty())
-		sz.push_back(1);
-	if (sz[sz.size() - 1] + bytes >= ULLONG_MAX) {
-		sz.push_back(1);
-		
-	}
-	sz[sz.size() - 1] += bytes;
+	sz += bytes;
 }
-vector<size_t> table_info::getByteSz() {
+size_t table_info::getByteSz() {
+	//18,446,744,073,709,551,615
+	// 1,152,921,504,606,846,976
+	//		   1,099,511,627,776
+
 
 	return sz;
 }
 
-bool table_info::addBuffer(size_t bytes) {
+bool table_info::enqueBuffer(size_t bytes) {
 	char* toAppend = nullptr;
 	try {
 		toAppend = new char[bytes];
@@ -93,18 +87,26 @@ bool table_info::addBuffer(size_t bytes) {
 		return false;
 
 	}
-	buffers.push_back(toAppend);
+	buffers.push(toAppend);
 	return true;
 }
-void table_info::removeBuffer() {
-	delete[] buffers.back();
-	buffers.pop_back();
+void table_info::dequeBuffer() {
+	char* tmp = buffers.front();
+	buffers.pop();
+	delete[] tmp;
+	
 }
 void table_info::clearBuffers() {
-	
-	for (auto buf : buffers) {
-		delete[] buf;
-		buf = nullptr;
+	char* tmp = NULL;
+	while (!buffers.empty()) {
+		tmp = buffers.front();
+		buffers.pop();
+		delete[] tmp;
 	}
-	buffers.clear();
+}
+int table_info::getBuffersLength() {
+	return buffers.size();
+}
+char* table_info::getHeadBuffer() {
+	return buffers.front();
 }

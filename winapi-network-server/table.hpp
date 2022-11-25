@@ -14,10 +14,11 @@ private:
 	int transmition_type;
 	int serial_number;
 	vector<Column> cols;
-	vector<size_t> sz;
+	size_t sz;
+	std::queue<char*> buffers;
 
 	public:
-		vector<char*> buffers;
+		
 		table_info(string db,string tName, int transmitionType, int serialNum);
 		table_info();
 		~table_info();
@@ -33,13 +34,14 @@ private:
 		void setTransmitionType(int transmitType);
 		void setSerialNum(int serialNum);
 		size_t getSize();
-
+		int getBuffersLength();
 		void incByteSz();
 		void incByteSz(size_t bytes);
-		vector<size_t> getByteSz();
-		bool addBuffer(size_t bytes);
-		void removeBuffer();
+		size_t getByteSz();
+		bool enqueBuffer(size_t bytes);
+		void dequeBuffer();
 		void clearBuffers();
+		char* getHeadBuffer();
 
 };
 

@@ -153,7 +153,7 @@ int packet::recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p
 	}
 */
 //TODO: Refactor buildDataPacket to include the column type -> TO CHECK
-void packet::buildDataPacket(char* packetBuffer, table_info& tInfo) {
+void packet::buildDataPacket(table_info& tInfo) {
 
 	string buffer("");
 	buffer += "{\r\n";
@@ -174,8 +174,9 @@ void packet::buildDataPacket(char* packetBuffer, table_info& tInfo) {
 	buffer += '}';
 	tInfo.incByteSz(buffer.size());
 	const char* tmp = buffer.c_str();
-	memcpy(packetBuffer, tmp, strlen(tmp));
-	packetBuffer[buffer.size()] = 0;
+	tInfo.enqueBuffer(buffer.size()+1);
+	memcpy(tInfo.getHeadBuffer(), tmp, strlen(tmp));
+	tInfo.getHeadBuffer()[buffer.size()] = 0;
 
 }
 

@@ -9,52 +9,71 @@ DWORD mainHandler(void* handlerInput) {
 	
 	handler_info* handler = (handler_info*)handlerInput;
 	cout << "this is thread with id " << handler->threadId << "\n\n\n";
+	char headerBuffer[1024];
 	
+	packet serverSender;
 	
+	//At this point, the client socket is mapped to the thread
+	//recieve the header packet here
 
-
+		int bytesSent = 0;
+		int totalBytesSent = 0;
+		bool firstEntry = true;
 	// packet class and table_info class are initialized by the recieveHeaderPacket function
 	while (true)
 	{
-		
-		if (!handler->handlerInput.t.addBuffer(BUFLEN))
-		{
-			cout << "No heap memory\n";
-			break;
+		if (!firstEntry) {
+
+			handler->handlerInput.p.~packet();
+			handler->handlerInput.t.~table_info();
+			handler->free = true;
+			SuspendThread(handler->hHandler);
+			cout << "thread was suspended but continued here\n";
+
 		}
-		char* buffer = handler->handlerInput.t.buffers.back();
-		ZeroMemory(buffer, BUFLEN);
-		char headerBuffer[512];
+		
+
 		ZeroMemory(headerBuffer, sizeof(headerBuffer));
-		packet p = packet(SERVER_SENDER, 1, 0, READ_TABLE, handler->handlerInput.t.getDbName(), handler->handlerInput.t.getTableName(), false);
-		int bytesSent = 0;
-		int total = 0;
+
+
+		if (recv(handler->handlerInput.connected_socket, headerBuffer, sizeof(headerBuffer)-1, 0) == SOCKET_ERROR) {
+			cout << "Failure to recieve data from the client with winsocket error " << WSAGetLastError() << '\n';
+			
+			if (firstEntry)
+				firstEntry = !firstEntry;
+			continue;
+		}
+		headerBuffer[sizeof(headerBuffer) - 1] = 0;
+		printf("Can data be recieved from a different thread?: \n %s\n", headerBuffer);
+
+		if (packet::recieveHeaderPacket(headerBuffer, handler->handlerInput.t, handler->handlerInput.p) == 0) 
+			continue;
+		
+		ZeroMemory(headerBuffer, sizeof(headerBuffer));
+		
+		
+
+
+		serverSender = packet(SERVER_SENDER, handler->handlerInput.p.serial_number, 0, READ_TABLE, handler->handlerInput.t.getDbName(), handler->handlerInput.t.getTableName(), false);
+		
 		switch (handler->handlerInput.p.transmition_type)
 		{
 		case READ_TABLE:
+
 			if (readTable(&(handler->handlerInput.t)) != 1) {
 				cout << "error occured with reading\n";
 			}
-			packet::buildDataPacket(buffer, handler->handlerInput.t);
-			p.next_packet_length = handler->handlerInput.t.getByteSz()[0];
-			p.buildHeaderPacket(headerBuffer);
+
+			//Steps:
+			//1. Build the data packet so the length will be known.
+			//2. Build the header packet and assign the length.
+			//3. Send the header packet.
+			//4. Send the data packet.
+			//*-> Possible logical use of a stack of linked lists/vector of pointers for the sake of the data packet's contents
+			//* Will also probably need to refactor
 
 			
-			while ((bytesSent = send(handler->handlerInput.connected_socket, headerBuffer, strlen(headerBuffer), 0)) != SOCKET_ERROR) {
-				total += bytesSent;
-			}
-			if (bytesSent == SOCKET_ERROR) {
-				cout << "Failed to send header packet with winsocket error " << WSAGetLastError() << '\n';
-				break;
-			}
-			total = 0;
-			while ((bytesSent = send(handler->handlerInput.connected_socket, buffer, BUFLEN, 0) != SOCKET_ERROR)) {
-				total += bytesSent;
-			}
-			if (bytesSent == SOCKET_ERROR) {
-				cout << "Failed to send data packet with winsocket error " << WSAGetLastError() << '\n';
-				break;
-			}
+			
 			cout << "Data packet sent.\n\n";
 			
 			break;
@@ -74,13 +93,6 @@ DWORD mainHandler(void* handlerInput) {
 		//Once all the functions have finished their work successfully the handler will send the data packet over the network
 		// or will send nothing incase a "dirty" page was written back
 
-		
-		delete[] buffer;
-		handler->handlerInput.p.~packet();
-		handler->handlerInput.t.~table_info();
-		handler->free = true;
-		SuspendThread(handler->hHandler);
-		cout << "thread was suspended but continued here\n";
 		
 	}
 
@@ -241,7 +253,7 @@ int sqliteCallbackReadTypes(void* table, int count, char** data, char** columns)
 	return 0;
 }
 
-int handlers_scheduler(handler_info handlers[], char* packetBuffer, SOCKET connectedSocket) {
+int handlers_scheduler(handler_info handlers[], std::queue<SOCKET>& clientsQueue) {
 
 	int i = 0;
 	for (i = 0; i < MAX_HANDLERS; i++) {
@@ -257,19 +269,13 @@ int handlers_scheduler(handler_info handlers[], char* packetBuffer, SOCKET conne
 		return 0;
 	}
 
-	handlers[i].handlerInput.connected_socket = connectedSocket;
-	printf("Packet buffer from the client is:\n %s\n", packetBuffer);
-	if (packet::recieveHeaderPacket(packetBuffer, handlers[i].handlerInput.t, handlers[i].handlerInput.p) == 0) {
-		handlers[i].free = true;
-		cout << "incorrect client format, packed dumped.\n";
+	handlers[i].handlerInput.connected_socket = clientsQueue.front();
+	clientsQueue.pop();
+	
+
+	if (ResumeThread(handlers[i].hHandler) == (DWORD)-1) {
 		return 0;
 	}
-	else {
 
-		if (ResumeThread(handlers[i].hHandler) == (DWORD)-1) {
-			return 0;
-		}
-
-	}
 	return 1;
 }

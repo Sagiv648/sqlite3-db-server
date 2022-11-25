@@ -32,6 +32,8 @@ void writeToFileTest(char* buffer);
 handler_info handlers[MAX_HANDLERS];
 
 
+std::queue<SOCKET> clientsQueue;
+
 EntryArguments args;
 
 int main(int argc, char** argv) {
@@ -84,27 +86,31 @@ int main(int argc, char** argv) {
 		 int recved = 0;
 		 int total = 0;
 		 SOCKET clSocket = accept(serverSocket, NULL, NULL);
+		 
 		 if (clSocket == INVALID_SOCKET) {
 			 cout << "Invalid client connection with winsocket error: " << WSAGetLastError() << '\n';
 			 continue;
 		 }
-
+		 clientsQueue.push(clSocket);
+		 handlers_scheduler(handlers, clientsQueue);
+		 
+			 
 		 
 
-		  // 4 KiB test
-		 int len = 0;
-		 if ((len = recv(clSocket, headerBuffer, BUFLEN / 16, 0)) > 0) {
-			 if (len < BUFLEN / 16 - 1) { 
-				 headerBuffer[len] = 0;
-				 writeToFileTest(headerBuffer);
-				//printf("buffer is:\n%s\n", headerBuffer);
+		 // // 4 KiB test
+		 //int len = 0;
+		 //if ((len = recv(clSocket, headerBuffer, BUFLEN / 16, 0)) > 0) {
+			// if (len < BUFLEN / 16 - 1) { 
+			//	 headerBuffer[len] = 0;
+			//	 writeToFileTest(headerBuffer);
+			//	//printf("buffer is:\n%s\n", headerBuffer);
 
-			 }
-			
-			 //ZeroMemory(headerBuffer, BUFLEN / 16);
-		 } 
-		 while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
+			// }
+			//
+			// //ZeroMemory(headerBuffer, BUFLEN / 16);
+		 //} 
 		 //while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
+		 ////while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
 
 		 
 
