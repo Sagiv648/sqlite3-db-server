@@ -5,10 +5,12 @@ table_info::table_info(string db, string tName, int transmitionType, int serialN
 	table_info::name = tName;
 	table_info::serial_number = serialNum;
 	table_info::transmition_type = transmitionType;
+	sz = 0;
 }
 table_info::table_info() {
 	table_info::serial_number = 0;
 	table_info::transmition_type = 0;
+	sz = 0;
 	
 }
 table_info::~table_info() {
@@ -103,10 +105,17 @@ void table_info::clearBuffers() {
 		buffers.pop();
 		delete[] tmp;
 	}
+	sz = 0;
 }
 int table_info::getBuffersLength() {
 	return buffers.size();
 }
 char* table_info::getHeadBuffer() {
 	return buffers.front();
+}
+char* table_info::getBackBuffer() {
+	return buffers.back();
+}
+void table_info::clearColumns() {
+	cols.clear();
 }

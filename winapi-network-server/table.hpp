@@ -42,7 +42,8 @@ private:
 		void dequeBuffer();
 		void clearBuffers();
 		char* getHeadBuffer();
-
+		char* getBackBuffer();
+		void clearColumns();
 };
 
 

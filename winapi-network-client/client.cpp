@@ -49,7 +49,7 @@ int main() {
 		WSACleanup();
 		return 1;
 	}
-	char headerPacket[] = "{\r\nOp_Code:100\r\nPacket_Serial_Num:12345\r\nNext_Packet_Len:673423\r\nTransmition_Type:1\r\nDatabase:test.db\r\nTable_Name:students\r\n}";
+	char headerPacket[] = "{\r\nOp_Code:200\r\nPacket_Serial_Num:12345\r\nNext_Packet_Len:673423\r\nTransmition_Type:1\r\nDatabase:test.db\r\nTable_Name:students\r\n}";
 	char tu[] = "Students";
 	int sent;
 	sent = send(clSocket, headerPacket, sizeof(headerPacket), 0);
@@ -63,24 +63,17 @@ int main() {
 	int recieved = 0;
 	int total = 0;
 	recieved = recv(clSocket, buffer, BUFLEN, 0);
-
-	/*while ((recieved = recv(clSocket, buffer, BUFLEN, 0)) != SOCKET_ERROR) {
-		total += recieved;
-	}*/
-
 	if (recieved != SOCKET_ERROR) {
 		buffer[BUFLEN - 1] = 0;
-		printf("The header recieved is:\n %s\n", buffer);
+		printf("The header recieved is:\n%s\n", buffer);
 	}
-	ZeroMemory(buffer, sizeof(buffer));
-	total = 0;
-	while ((recieved = recv(clSocket, buffer, BUFLEN, 0)) != SOCKET_ERROR) {
-		total += recieved;
-
-	}
+	recieved =  recv(clSocket, buffer, BUFLEN, 0);
 	if (recieved != SOCKET_ERROR) {
-		buffer[BUFLEN - 1] = 0;
-		printf("The data recieved is:\n %s\n", buffer);
+		buffer[recieved] = 0;
+		printf("The data recieved is:\n%s\n", buffer);
+	}
+	if (recieved == SOCKET_ERROR) {
+		std::cout << "ERROR at getting the data " << WSAGetLastError() << '\n';
 	}
 
 
@@ -96,5 +89,6 @@ int main() {
 	closesocket(clSocket);
 	WSACleanup();
 
+	getchar();
 	return 0;
 }

@@ -8,7 +8,7 @@ DWORD mainHandler(void* handlerInput) {
 
 	
 	handler_info* handler = (handler_info*)handlerInput;
-	cout << "this is thread with id " << handler->threadId << "\n\n\n";
+	
 	char headerBuffer[1024];
 	
 	packet serverSender;
@@ -22,39 +22,38 @@ DWORD mainHandler(void* handlerInput) {
 	// packet class and table_info class are initialized by the recieveHeaderPacket function
 	while (true)
 	{
+		ZeroMemory(headerBuffer, sizeof(headerBuffer));
 		if (!firstEntry) {
 
-			handler->handlerInput.p.~packet();
-			handler->handlerInput.t.~table_info();
+			handler->handlerInput.t.clearColumns();
+			handler->handlerInput.t.clearBuffers();
 			handler->free = true;
 			SuspendThread(handler->hHandler);
-			cout << "thread was suspended but continued here\n";
+			
 
 		}
 		
-
-		ZeroMemory(headerBuffer, sizeof(headerBuffer));
-
-
 		if (recv(handler->handlerInput.connected_socket, headerBuffer, sizeof(headerBuffer)-1, 0) == SOCKET_ERROR) {
 			cout << "Failure to recieve data from the client with winsocket error " << WSAGetLastError() << '\n';
-			
 			if (firstEntry)
 				firstEntry = !firstEntry;
 			continue;
 		}
+		if (firstEntry)
+			firstEntry = !firstEntry;
 		headerBuffer[sizeof(headerBuffer) - 1] = 0;
-		printf("Can data be recieved from a different thread?: \n %s\n", headerBuffer);
-
+		
+		
 		if (packet::recieveHeaderPacket(headerBuffer, handler->handlerInput.t, handler->handlerInput.p) == 0) 
 			continue;
 		
 		ZeroMemory(headerBuffer, sizeof(headerBuffer));
 		
 		
-
-
-		serverSender = packet(SERVER_SENDER, handler->handlerInput.p.serial_number, 0, READ_TABLE, handler->handlerInput.t.getDbName(), handler->handlerInput.t.getTableName(), false);
+		uint32_t sz = 0;
+		uint32_t total = 0;
+		uint32_t sent = 0;
+		
 		
 		switch (handler->handlerInput.p.transmition_type)
 		{
@@ -64,23 +63,38 @@ DWORD mainHandler(void* handlerInput) {
 				cout << "error occured with reading\n";
 			}
 
-			//Steps:
-			//1. Build the data packet so the length will be known.
-			//2. Build the header packet and assign the length.
-			//3. Send the header packet.
-			//4. Send the data packet.
-			//*-> Possible logical use of a stack of linked lists/vector of pointers for the sake of the data packet's contents
-			//* Will also probably need to refactor
+			packet::buildDataPacket(handler->handlerInput.t);
+			serverSender = packet(SERVER_SENDER,handler->handlerInput.p.serial_number, handler->handlerInput.t.getByteSz(), handler->handlerInput.p.transmition_type,
+				handler->handlerInput.t.getDbName(), handler->handlerInput.t.getTableName(),true);
+			sz = serverSender.buildHeaderPacket(headerBuffer);
 
 			
-			
-			cout << "Data packet sent.\n\n";
-			
+			if ((sent = send(handler->handlerInput.connected_socket, headerBuffer, sz, 0)) == SOCKET_ERROR) {
+				cout << "Failure to send packets to the client with winsocket error " << WSAGetLastError() << '\n';
+				continue;
+			}
+			sent = 0;
+
+			if ((sent = send(handler->handlerInput.connected_socket, handler->handlerInput.t.getBackBuffer(), handler->handlerInput.t.getByteSz(), 0)) == SOCKET_ERROR) {
+				cout << "Failure to send data to the client with winsocket error " << WSAGetLastError() << '\n';
+				continue;
+				total += sent;
+			}
+
 			break;
 		case WRITE_TABLE:
+
+			//Steps to fulfill:
+			//1. Recieve the header packet (Header packet should really rarely to never bypass the 1 KiB boundary)
+			//2. Parse the header packet to retrieve the name of the db in question, the name of the table in question and the size (each buffer is 64 KiB boundary)
+			//3. Call writeTable with the data located in the handler->handlerInput.t object
 			if (writeTable(&(handler->handlerInput.t)) != 1) {
 				cout << "error occured with writing\n";
 			}
+
+
+
+
 			break;
 			// Handle writing a "dirty" table back to the database
 
@@ -177,6 +191,7 @@ int writeTable(table_info* table) {
 	
 	sql += ';';
 	char* errMsg = NULL;
+	//Since multiple clients may try to write to the same table in the same db, a lock will most likely be needed.
 	DWORD mtxResult = WaitForSingleObject(writerMutex, INFINITE);
 	sqlite3_exec(db, sql.c_str(), NULL, NULL, &errMsg);
 	ReleaseMutex(writerMutex);
@@ -268,9 +283,9 @@ int handlers_scheduler(handler_info handlers[], std::queue<SOCKET>& clientsQueue
 		//No available handlers, return 0
 		return 0;
 	}
-
 	handlers[i].handlerInput.connected_socket = clientsQueue.front();
 	clientsQueue.pop();
+
 	
 
 	if (ResumeThread(handlers[i].hHandler) == (DWORD)-1) {

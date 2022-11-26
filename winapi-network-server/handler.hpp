@@ -18,14 +18,14 @@
 
 DWORD mainHandler(void* handlerInput);
 
-typedef struct {
+ struct handler_input {
 
 	packet p;
 	table_info t;
 	SOCKET connected_socket;
 
 
-} handler_input;
+};
 
  struct handler_info {
 	HANDLE hHandler;

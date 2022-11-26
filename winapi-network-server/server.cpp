@@ -93,31 +93,7 @@ int main(int argc, char** argv) {
 		 }
 		 clientsQueue.push(clSocket);
 		 handlers_scheduler(handlers, clientsQueue);
-		 
-			 
-		 
-
-		 // // 4 KiB test
-		 //int len = 0;
-		 //if ((len = recv(clSocket, headerBuffer, BUFLEN / 16, 0)) > 0) {
-			// if (len < BUFLEN / 16 - 1) { 
-			//	 headerBuffer[len] = 0;
-			//	 writeToFileTest(headerBuffer);
-			//	//printf("buffer is:\n%s\n", headerBuffer);
-
-			// }
-			//
-			// //ZeroMemory(headerBuffer, BUFLEN / 16);
-		 //} 
-		 //while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
-		 ////while (handlers_scheduler(handlers, headerBuffer, clSocket) == 0);
-
-		 
-
-		 
-
-
-		 
+		
 	 }
 
 

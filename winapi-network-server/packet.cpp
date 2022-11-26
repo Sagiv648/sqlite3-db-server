@@ -36,27 +36,32 @@ void packet::setPacket(char opcode, int serialNum, size_t nextPacketLen, char tr
 
 size_t packet::buildHeaderPacket(char* packetBuffer) {
 
-	string buffer = string("");
+	string buffer = string("{\r\n");
 	stringstream ss = stringstream();
-	buffer += "{\r\n";
-	ss << packet::op_code;
 	
-	buffer += "Op_Code: " + ss.str();
+	ss << packet::op_code;
+	char midBuff[30];
+	memset(midBuff, 0, sizeof(midBuff));
+	_itoa_s(op_code, midBuff, 10);
+
+	buffer += "Op_Code: " + string(midBuff);
+
 	buffer += "\r\n";
-	ss.str("");
-	ss << packet::serial_number;
-	buffer += "Packet_Serial_Num: " + ss.str();
+	memset(midBuff, 0, sizeof(midBuff));
+	_itoa_s(serial_number, midBuff, 10);
+	buffer += "Packet_Serial_Num: " + string(midBuff);
 	buffer += "\r\n";
-	ss.str("");
-	ss << packet::next_packet_length;
-	buffer += "Next_Packet_Len: " + ss.str();
+	memset(midBuff, 0, sizeof(midBuff));
+	_itoa_s(next_packet_length, midBuff, 10);
+	
+	buffer += "Next_Packet_Len: " + string(midBuff);
 	buffer += "\r\n";
-	ss.str("");
-	ss << packet::transmition_type;
-	buffer += "Transmition_Type: " + ss.str();
+	memset(midBuff, 0, sizeof(midBuff));
+	_itoa_s(transmition_type, midBuff, 10);
+	buffer += "Transmition_Type: " + string(midBuff);
 	buffer += "\r\n";
 	buffer += "Database: " + packet::db_name;
-	buffer += "\r\n}";
+	buffer += "\r\n";
 	buffer += "Table_Name: " + packet::table_name;
 	buffer += "\r\n}";
 	const char* tmp = buffer.c_str();
@@ -109,8 +114,12 @@ int packet::recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p
 		return 0;
 	}
 
-	p = packet(stoi(container[0]), stoi(container[2]), stoi(container[1]), stoi(container[3]), container[4], container[5], false);
-	tInfo = table_info(container[4], container[5], stoi(container[3]), stoi(container[2]));
+	p.setPacket(stoi(container[0]), stoi(container[2]), stoi(container[1]), stoi(container[3]), container[4], container[5], false);
+	tInfo.setDbName(container[4]);
+	tInfo.setTableName(container[5]);
+	tInfo.setTransmitionType(stoi(container[3]));
+	tInfo.setSerialNum(stoi(container[2]));
+	
 	return 1;
 	
 }
@@ -168,15 +177,29 @@ void packet::buildDataPacket(table_info& tInfo) {
 				buffer += tInfo[i][k] + "\r\n";
 			else
 				buffer += tInfo[i][k] + '|';
+			
+			if (buffer.size() >= BUFLEN) {
+				tInfo.incByteSz(BUFLEN);
+				if (!tInfo.enqueBuffer(BUFLEN + 1)) {
+					cout << "Not enough memory.\n";
+					ExitProcess(0);
+				}
+				memcpy(tInfo.getBackBuffer(), buffer.c_str(), BUFLEN);
+				tInfo.getBackBuffer()[BUFLEN] = 0;
+				buffer = string("");
+			}
+
+
 		}
+		
 	}
 	
 	buffer += '}';
 	tInfo.incByteSz(buffer.size());
 	const char* tmp = buffer.c_str();
 	tInfo.enqueBuffer(buffer.size()+1);
-	memcpy(tInfo.getHeadBuffer(), tmp, strlen(tmp));
-	tInfo.getHeadBuffer()[buffer.size()] = 0;
+	memcpy(tInfo.getBackBuffer(), tmp, strlen(tmp));
+	tInfo.getBackBuffer()[buffer.size()] = 0;
 
 }
 
