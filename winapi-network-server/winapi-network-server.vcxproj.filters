@@ -56,5 +56,8 @@
     <ClInclude Include="column.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="packetblock.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

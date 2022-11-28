@@ -21,6 +21,7 @@
 
 
 
+
 /*Since the application is mainly to have a client computer access a db from a server through the network
 the client will get the tables from the server through the network in an encrypted fashion which the client app will have the means to decrypt
 and send encrypted "dirty" tables back to the server

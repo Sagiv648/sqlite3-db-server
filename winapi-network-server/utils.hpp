@@ -11,6 +11,7 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include "table.hpp"
 
 using std::string;
 using std::vector;

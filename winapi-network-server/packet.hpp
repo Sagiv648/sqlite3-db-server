@@ -23,6 +23,8 @@
 		%(Column_Name_Placeholder_#N):(%(Column_Data_#1)|%(Column_Data_#2)|%(Column_Data_#N))\r\n
 	}
 */
+
+//TODO: Implement packet as a linked list of packetBlocks
 class packet
 {
 public:

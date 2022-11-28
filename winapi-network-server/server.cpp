@@ -73,19 +73,12 @@ int main(int argc, char** argv) {
 	}
 	
 */
-	 char dataPacket[] = "{\r\nName:timmy|johnny|kim\r\nAge:16|17|18\r\nClass:Computer science|Engineering|Art\r\n}";
-	 char headerPacket[] = "{\r\nOp_Code:100\r\nPacket_Serial_Num:12345\r\nNext_Packet_Len:673423\r\nTransmition_Type:1\r\nDatabase:test.db\r\nTable_Name:students\r\n}";
-	 char tu[] = "Students";
 	 
-	 char headerBuffer[BUFLEN / 16];
 	 while (true) {
 		 sockaddr connectedAddress;
 		 ZeroMemory(&connectedAddress, sizeof(connectedAddress));
-		 int connectedAddrSize = sizeof(sockaddr);
-		 ZeroMemory(headerBuffer, BUFLEN / 16);
-		 int recved = 0;
-		 int total = 0;
-		 SOCKET clSocket = accept(serverSocket, NULL, NULL);
+		 int connectedAddrSize = 0;
+		 SOCKET clSocket = accept(serverSocket, &connectedAddress, &connectedAddrSize);
 		 
 		 if (clSocket == INVALID_SOCKET) {
 			 cout << "Invalid client connection with winsocket error: " << WSAGetLastError() << '\n';

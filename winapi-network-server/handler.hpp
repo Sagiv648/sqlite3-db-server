@@ -11,7 +11,7 @@
 #include <sqlite3.h>
 #include <WinSock2.h>
 #include "utils.hpp"
-#include "packet.hpp"
+//#include "packet.hpp"
 #include "network.hpp"
 
 #define MAX_HANDLERS 5
