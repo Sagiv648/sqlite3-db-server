@@ -160,6 +160,7 @@
     <ClCompile Include="handler.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="packet.cpp" />
+    <ClCompile Include="packetblock.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="table.cpp" />
     <ClCompile Include="utils.cpp" />

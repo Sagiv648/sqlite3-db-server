@@ -3,36 +3,37 @@
 #include "utils.hpp"
 #include "network.hpp"
 #include "column.hpp"
-
+#include "packet.hpp"
 
 
 //TODO: Refactor table_info class to be managed in a better way and to account for the column types
 class table_info {
-private:
-	std::string database;
-	std::string name;
-	int transmition_type;
-	int serial_number;
+
+	std::string db_name;
+	std::string table_name;
 	vector<Column> cols;
 	size_t sz;
 	std::queue<char*> buffers;
+	
+	std::pair<packet, packet> packets;
 
 	public:
 		
-		table_info(string db,string tName, int transmitionType, int serialNum);
+		table_info(string db,string tName, packet table_packet);
 		table_info();
-		~table_info();
-		void setTableInfo(string db,string tName, int transmitionType, int serialNum);
+		
+		void setTableInfo(string db,string tName);
 		Column& operator[](size_t index);
 		void addColumn(Column col);
 		string& getDbName();
 		string& getTableName();
-		int& getTransmitionType();
-		int& getSerialNum();
+		packet& getHeaderPacket();
+		void setHeaderPacket(packet& p);
+		packet& getBodyPacket();
+		void setBodyPacket(packet& p);
 		void setDbName(string dbName);
 		void setTableName(string tName);
-		void setTransmitionType(int transmitType);
-		void setSerialNum(int serialNum);
+		//--------------------------------------
 		size_t getSize();
 		int getBuffersLength();
 		void incByteSz();

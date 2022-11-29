@@ -3,6 +3,8 @@
 #include "network.hpp"
 #include "utils.hpp"
 #include "table.hpp"
+#include "packetblock.hpp"
+#include <list>
 //Packet header:
 /*
 	{\r\n
@@ -32,12 +34,12 @@ public:
 	int serial_number;
 	size_t next_packet_length;
 	char transmition_type;
-	string db_name;
-	string table_name;
 	bool is_Data_Packet;
+	table_info tableInfo;
+	std::vector<PacketBlock> blocks;
 
 
-	packet(char opcode, int serialNum, size_t nextPacketLen, char transmitionType, string dbName ,string tableName, bool isDataPacket); //^
+	packet(char opcode, int serialNum, size_t nextPacketLen, char transmitionType, bool isDataPacket); //^
 	packet();
 	~packet();
 

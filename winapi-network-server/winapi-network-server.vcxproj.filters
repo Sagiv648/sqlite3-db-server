@@ -36,6 +36,9 @@
     <ClCompile Include="column.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="packetblock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils.hpp">

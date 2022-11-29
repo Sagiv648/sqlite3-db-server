@@ -12,7 +12,7 @@ packet::packet(char opcode, int serialNum, size_t nextPacketLen, char transmitio
 	packet::is_Data_Packet = isDataPacket;
 }
 packet::~packet() {
-
+	
 }
 packet::packet() {
 	packet::op_code = 0;

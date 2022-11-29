@@ -5,11 +5,15 @@
 
 class PacketBlock {
 
-	char* block;
+	std::string block;
 	size_t sz;
 	static const size_t limit = BUFLEN;
 
-
+	PacketBlock(std::string memblock,size_t memSz);
+	PacketBlock();
+	std::string getBlock();
+	size_t getSize();
+	size_t appendBlock(std::string memblock, size_t memSz);
 
 	
 
