@@ -17,6 +17,7 @@ DWORD mainHandler(void* handlerInput) {
 		int bytesSent = 0;
 		int totalBytesSent = 0;
 		bool firstEntry = true;
+		
 	// packet class and table_info class are initialized by the recieveHeaderPacket function
 	while (true)
 	{
@@ -30,22 +31,15 @@ DWORD mainHandler(void* handlerInput) {
 			
 
 		}
-		
-		if (recv(handler->handlerInput.connected_socket, headerBuffer, sizeof(headerBuffer)-1, 0) == SOCKET_ERROR) {
-			cout << "Failure to recieve data from the client with winsocket error " << WSAGetLastError() << '\n';
-			if (firstEntry)
-				firstEntry = !firstEntry;
-			continue;
-		}
 		if (firstEntry)
 			firstEntry = !firstEntry;
-		headerBuffer[sizeof(headerBuffer) - 1] = 0;
 		
-		
-		if (packet::recieveHeaderPacket(headerBuffer, handler->handlerInput.t, handler->handlerInput.p) == 0) 
+		if (!handler->handlerInput.t.getHeaderPacket().recievePacket(handler->handlerInput.connected_socket)) {
+
+			cout << "Error occured while reading the header " << WSAGetLastError() << '\n';
 			continue;
-		
-		ZeroMemory(headerBuffer, sizeof(headerBuffer));
+
+		}
 		
 		
 		uint32_t sz = 0;
@@ -53,7 +47,7 @@ DWORD mainHandler(void* handlerInput) {
 		uint32_t sent = 0;
 		
 		
-		switch (handler->handlerInput.p.transmition_type)
+		switch (handler->handlerInput.t.getHeaderPacket().getTransmitionType())
 		{
 		case READ_TABLE:
 

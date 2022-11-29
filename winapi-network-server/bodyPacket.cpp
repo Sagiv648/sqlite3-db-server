@@ -42,12 +42,30 @@ void BodyPacket::buildPacket() {
 	
 }
 
+
+
 //TODO: BodyPacket - recievePacket -> Add actual recv functionality to the procedure
-bool BodyPacket::recievePacket() {
+bool BodyPacket::recievePacket(SOCKET sender) {
 
 
+	char buffer[1024]{};
+	int recieved = 0;
+	int totalLen = 0;
+	size_t remainingIndex = 0;
+	while ((recieved = recv(sender, buffer, 1024, 0)) > 0) {
+		totalLen += recieved;
 
-
+		remainingIndex = blocks[blocks.size() - 1].appendBlock(string(buffer), recieved);
+		cout << "Current body buffer is: \n" << blocks[blocks.size() - 1].getBlock() << '\n';
+		if (remainingIndex > 0) {
+			blocks.push_back(PacketBlock());
+			blocks[blocks.size() - 1].setBlock(string(buffer).substr(remainingIndex, string(buffer).size() - remainingIndex));
+		}
+		
+		memset(buffer, 0, sizeof(buffer));
+	}
+	if (recieved == SOCKET_ERROR)
+		return false;
 
 
 

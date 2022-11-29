@@ -36,15 +36,27 @@ protected:
 	char transmition_type;
 	Table tableInfo;
 	vector<PacketBlock> blocks;
+	
 
 	public:
 		virtual void buildPacket();
-		virtual bool recievePacket();
+		virtual bool recievePacket(SOCKET sender);
 	Packet(char opcode, int serialNum, size_t nextPacketLen, char transmitionType,Table& t); //^
 	Packet();
 	
-	 void setPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType,Table& t);
-	 void setTable(Table& t);
+	 virtual void setPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType,Table& t);
+	 virtual void setTable(Table& t);
+	 virtual char getOpCode();
+	 virtual void setOpCode(char opcode);
+	 virtual int getSerial();
+	 virtual void setSerial(int serial);
+	 virtual size_t getNextPacketLength();
+	 virtual void setNextPacketLength(size_t len);
+	 virtual char getTransmitionType();
+	 virtual void setTransmitionType(char type);
+	 virtual vector<PacketBlock> getBlocks();
+
+	 
 };
 
 #endif // !_PACKET_H_H

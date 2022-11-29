@@ -37,6 +37,32 @@ void Packet::setTable(Table& t) {
 	tableInfo = t;
 }
 
+vector<PacketBlock> Packet::getBlocks() {
+	return blocks;
+}
+
+void Packet::setOpCode(char opcode) {
+	op_code = opcode;
+}
+int Packet::getSerial() {
+	return serial_number;
+}
+void Packet::setSerial(int serial) {
+	serial_number = serial;
+}
+size_t Packet::getNextPacketLength() {
+	return next_packet_length;
+}
+void Packet::setNextPacketLength(size_t len) {
+	next_packet_length = len;
+}
+char Packet::getTransmitionType() {
+	return transmition_type;
+}
+void Packet::setTransmitionType(char type) {
+	transmition_type = type;
+}
+
 //Returns 1 for success and 0 for failure
 
 

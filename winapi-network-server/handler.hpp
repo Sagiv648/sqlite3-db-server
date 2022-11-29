@@ -61,8 +61,8 @@ int sqliteCallbackRead(void* table, int count, char** colData, char** colName);
 
 int sqliteCallbackReadTypes(void* table, int count, char** data, char** columns);
 
-int readTable(table_info* table);
+int readTable(Table* table);
 
-int writeTable(table_info* table);
+int writeTable(Table* table);
 
 #endif // !HANDLER_H_
