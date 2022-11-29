@@ -11,8 +11,6 @@ DWORD mainHandler(void* handlerInput) {
 	
 	char headerBuffer[1024];
 	
-	packet serverSender;
-	
 	//At this point, the client socket is mapped to the thread
 	//recieve the header packet here
 
@@ -24,7 +22,7 @@ DWORD mainHandler(void* handlerInput) {
 	{
 		ZeroMemory(headerBuffer, sizeof(headerBuffer));
 		if (!firstEntry) {
-
+			
 			handler->handlerInput.t.clearColumns();
 			handler->handlerInput.t.clearBuffers();
 			handler->free = true;
@@ -133,7 +131,7 @@ int setup_handlers(handler_info handlers[], SOCKET serverSock) {
 
 int sqliteCallbackRead(void* table, int count, char** data, char** columns) {
 
-	table_info* ptr = (table_info*)table;
+	Table* ptr = (Table*)table;
 	int i;
 
 	size_t totalCols = ptr->getSize();
@@ -154,7 +152,7 @@ int sqliteCallbackRead(void* table, int count, char** data, char** columns) {
 }
 
 
-int writeTable(table_info* table) {
+int writeTable(Table* table) {
 
 	
 	sqlite3* db;
@@ -209,7 +207,7 @@ int writeTable(table_info* table) {
 //TODO: Handle the event that the table to be read is larger than 64 KiB
 //One way could be to count each byte read from the table and test whether it's larger or can fit, if larger an additional allocation could be required along with an additional send()
 //Potentially having a vector of char* for the problem of data larger than 64 KiB, probably max up to 2 char * with 64 KiB heap allocated memory
-int readTable(table_info* table) {
+int readTable(Table* table) {
 
 	sqlite3* db;
 	
@@ -246,7 +244,7 @@ int readTable(table_info* table) {
 
 int sqliteCallbackReadTypes(void* table, int count, char** data, char** columns) {
 
-	table_info* ptr = (table_info*)table;
+	Table* ptr = (Table*)table;
 	int i;
 
 	

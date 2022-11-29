@@ -39,6 +39,12 @@
     <ClCompile Include="packetblock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="headerPacket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bodyPacket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils.hpp">
@@ -47,19 +53,25 @@
     <ClInclude Include="network.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="packet.hpp">
+    <ClInclude Include="Packet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="table.hpp">
+    <ClInclude Include="Table.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="handler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="column.hpp">
+    <ClInclude Include="Column.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="packetblock.hpp">
+    <ClInclude Include="PacketBlock.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HeaderPacket.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BodyPacket.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

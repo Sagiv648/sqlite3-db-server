@@ -20,8 +20,8 @@ DWORD mainHandler(void* handlerInput);
 
  struct handler_input {
 
-	packet p;
-	table_info t;
+	Packet p;
+	Table t;
 	SOCKET connected_socket;
 
 

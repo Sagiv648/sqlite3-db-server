@@ -33,3 +33,6 @@ std::string PacketBlock::getBlock() {
 	return block;
 }
 
+void PacketBlock::setBlock(std::string buffer) {
+	block = buffer;
+}

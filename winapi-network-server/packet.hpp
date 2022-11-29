@@ -26,32 +26,25 @@
 	}
 */
 
-//TODO: Implement packet as a linked list of packetBlocks
-class packet
+
+class Packet
 {
-public:
+protected:
 	char op_code;
 	int serial_number;
 	size_t next_packet_length;
 	char transmition_type;
-	bool is_Data_Packet;
-	table_info tableInfo;
-	std::vector<PacketBlock> blocks;
+	Table tableInfo;
+	vector<PacketBlock> blocks;
 
-
-	packet(char opcode, int serialNum, size_t nextPacketLen, char transmitionType, bool isDataPacket); //^
-	packet();
-	~packet();
-
-	size_t buildHeaderPacket(char* packetBuffer); //^
-	static int recieveHeaderPacket(char* packetBuffer, table_info& tInfo, packet& p); //^
-	static void buildDataPacket(table_info& tInfo); //^
-	void recieveDataPacket(char* packetBuffer, table_info& tInfo); //^
-
+	public:
+		virtual void buildPacket();
+		virtual bool recievePacket();
+	Packet(char opcode, int serialNum, size_t nextPacketLen, char transmitionType,Table& t); //^
+	Packet();
 	
-
-	
-	void setPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType, string dbName, string tableName, bool isDataPacket);
+	 void setPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType,Table& t);
+	 void setTable(Table& t);
 };
 
 #endif // !_PACKET_H_H

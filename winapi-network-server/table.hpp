@@ -4,10 +4,11 @@
 #include "network.hpp"
 #include "column.hpp"
 #include "packet.hpp"
-
+#include "HeaderPacket.hpp"
+#include "BodyPacket.hpp"
 
 //TODO: Refactor table_info class to be managed in a better way and to account for the column types
-class table_info {
+class Table {
 
 	std::string db_name;
 	std::string table_name;
@@ -15,22 +16,22 @@ class table_info {
 	size_t sz;
 	std::queue<char*> buffers;
 	
-	std::pair<packet, packet> packets;
+	std::pair<HeaderPacket, BodyPacket> packets;
 
 	public:
 		
-		table_info(string db,string tName, packet table_packet);
-		table_info();
+		Table(string db,string tName, HeaderPacket header);
+		Table();
 		
 		void setTableInfo(string db,string tName);
 		Column& operator[](size_t index);
 		void addColumn(Column col);
 		string& getDbName();
 		string& getTableName();
-		packet& getHeaderPacket();
-		void setHeaderPacket(packet& p);
-		packet& getBodyPacket();
-		void setBodyPacket(packet& p);
+		HeaderPacket& getHeaderPacket();
+		void setHeaderPacket(HeaderPacket& p);
+		BodyPacket& getBodyPacket();
+		void setBodyPacket(BodyPacket& p);
 		void setDbName(string dbName);
 		void setTableName(string tName);
 		//--------------------------------------
