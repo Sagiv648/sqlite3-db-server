@@ -161,7 +161,6 @@
     <ClCompile Include="handler.cpp" />
     <ClCompile Include="headerPacket.cpp" />
     <ClCompile Include="network.cpp" />
-    <ClCompile Include="packet.cpp" />
     <ClCompile Include="packetblock.cpp" />
     <ClCompile Include="server.cpp" />
     <ClCompile Include="table.cpp" />
@@ -174,7 +173,6 @@
     <ClInclude Include="HeaderPacket.hpp" />
     <ClInclude Include="PacketBlock.hpp" />
     <ClInclude Include="network.hpp" />
-    <ClInclude Include="Packet.hpp" />
     <ClInclude Include="Table.hpp" />
     <ClInclude Include="utils.hpp" />
   </ItemGroup>

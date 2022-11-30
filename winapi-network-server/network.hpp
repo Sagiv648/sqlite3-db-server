@@ -47,14 +47,41 @@ and send encrypted "dirty" tables back to the server
 */
 
 
+//According to sqlite3, the base storage classes are:
+/*
+	NULL. The value is a NULL value.
+
+	INTEGER. The value is a signed integer, stored in 0, 1, 2, 3, 4, 6, or 8 bytes depending on the magnitude of the value.
+
+	REAL. The value is a floating point value, stored as an 8-byte IEEE floating point number.
+
+	TEXT. The value is a text string, stored using the database encoding (UTF-8, UTF-16BE or UTF-16LE).
+
+	BLOB. The value is a blob of data, stored exactly as it was input.
+
+*/
+
 //Actual data packet:
 /*
 	{\r\n
-		(Column_Name_Placeholder_#1):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
-		(Column_Name_Placeholder_#2):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
-		(Column_Name_Placeholder_#N):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#1)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#2)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#N)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
 	}
 */
+//TODO: Refactor buildDataPacket to include the column type -> TO CHECK
+
+
+
+//Actual data packet:
+/*
+	{\r\n
+		(Column_Name_Placeholder_#1)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#2)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+		(Column_Name_Placeholder_#N)|(Column_Type):(Column_Data_#1)|(Column_Data_#2)|(Column_Data_#N)\r\n
+	}
+*/
+
 
 
 

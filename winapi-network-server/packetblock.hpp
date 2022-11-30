@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "network.hpp"
 
+
 class PacketBlock {
 
 	std::string block;

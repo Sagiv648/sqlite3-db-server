@@ -1,18 +1,28 @@
 #ifndef _HEADERPACKET_H_
 #define _HEADERPACKET_H_
-#include "packet.hpp"
+
+#include "PacketBlock.hpp"
+#include "Table.hpp"
 
 
-class HeaderPacket : public Packet 
+
+
+class HeaderPacket
 {
-	
+	char op_code;
+	int serial_number;
+	size_t next_packet_length;
+	char transmition_type;
+	PacketBlock block;
 	
 
 public:
-	void buildPacket() override;
-	bool recievePacket(SOCKET sender) override;
-	void setPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType, Table& t);
-	void setTable(Table& t);
+	HeaderPacket(HeaderPacket& header);
+	HeaderPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType);
+	HeaderPacket();
+	void buildPacket(Table& tableInfo);
+	bool recievePacket(SOCKET sender);
+	void setHeader(char opcode, int serialNum, size_t nextPacketLen, char transmitionType);
 	char getOpCode();
 	void setOpCode(char opcode);
 	int getSerial();
@@ -21,7 +31,7 @@ public:
 	void setNextPacketLength(size_t len);
 	char getTransmitionType();
 	void setTransmitionType(char type);
-	vector<PacketBlock> getBlocks();
+	PacketBlock getBlock();
 	
 };
 

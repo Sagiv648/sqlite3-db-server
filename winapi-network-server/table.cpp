@@ -1,12 +1,18 @@
-#include "table.hpp"
+#include "Table.hpp"
 
-Table::Table(string db, string tName, HeaderPacket header) {
+Table::Table(string db, string tName) {
 	db_name = db;
 	table_name = tName;
-	packets.first = header;
 	sz = 0;
 }
-Table::Table() {
+Table::Table()
+{
+	sz = 0;
+}
+
+Table::Table(Table& t) : Table(t.db_name,t.table_name)
+{
+
 }
 
 void Table::setTableInfo(string db, string tName) {
@@ -17,26 +23,13 @@ Column& Table::operator[](size_t index) {
 	return cols[index];
 }
 
+Table& Table::operator=(Table right)
+{
+	return right;
+}
+
 void Table::addColumn(Column col) {
 	cols.push_back(col);
-}
-
-HeaderPacket& Table::getHeaderPacket() {
-	return packets.first;
-}
-
-void Table::setHeaderPacket(HeaderPacket& p) {
-	packets.first = p;
-}
-
-BodyPacket& Table::getBodyPacket()
-{
-	return packets.second;
-}
-
-void Table::setBodyPacket(BodyPacket& p)
-{
-	packets.second = p;
 }
 
 string& Table::getDbName() {
@@ -101,7 +94,7 @@ void Table::clearBuffers() {
 	}
 	sz = 0;
 }
-int Table::getBuffersLength() {
+size_t Table::getBuffersLength() {
 	return buffers.size();
 }
 char* Table::getHeadBuffer() {

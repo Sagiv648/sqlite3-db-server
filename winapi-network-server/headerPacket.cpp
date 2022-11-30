@@ -1,8 +1,29 @@
 #include "HeaderPacket.hpp"
-#include "Packet.hpp"
 
 
-void HeaderPacket:: buildPacket() {
+
+HeaderPacket::HeaderPacket() {
+
+}
+
+
+HeaderPacket::HeaderPacket(HeaderPacket& header) : HeaderPacket(header.op_code,header.serial_number,header.next_packet_length,header.transmition_type)
+{
+	
+}
+
+HeaderPacket::HeaderPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType)
+{
+	
+	op_code = opcode;
+	serial_number = serialNum;
+	next_packet_length = nextPacketLen;
+	transmition_type = transmitionType;
+	
+}
+
+
+void HeaderPacket:: buildPacket(Table& tableInfo) {
 
 	string buffer = string("{\r\n");
 	
@@ -33,8 +54,8 @@ void HeaderPacket:: buildPacket() {
 	buffer += "Table_Name: " + tableInfo.getTableName();
 	buffer += "\r\n}";
 
-	blocks[blocks.size() - 1].setBlock(buffer);
-	//blocks.setBlock(buffer);
+	block.setBlock(buffer);
+	
 }
 
 
@@ -45,7 +66,11 @@ bool HeaderPacket::recievePacket(SOCKET sender) {
 	int recieved = 0;
 	int totalLen = 0;
 	size_t remainingIndex = 0;
-	while ((recieved = recv(sender, buffer, 1024, 0)) > 0) {
+
+
+
+	//TOOD: Refactor to account for only one block for header
+	/*while ((recieved = recv(sender, buffer, 1024, 0)) > 0) {
 		totalLen += recieved;
 		
 		remainingIndex = blocks[blocks.size() - 1].appendBlock(string(buffer), recieved);
@@ -58,7 +83,7 @@ bool HeaderPacket::recievePacket(SOCKET sender) {
 		memset(buffer, 0, sizeof(buffer));
 	}
 	if (recieved == SOCKET_ERROR)
-		return false;
+		return false;*/
 
 
 
@@ -108,4 +133,46 @@ bool HeaderPacket::recievePacket(SOCKET sender) {
 
 
 	return true;
+}
+
+void HeaderPacket::setHeader(char opcode, int serialNum, size_t nextPacketLen, char transmitionType) {
+
+	op_code = opcode;
+	serial_number = serialNum;
+	next_packet_length = nextPacketLen;
+	transmition_type = transmitionType;
+	
+
+}
+
+
+
+PacketBlock HeaderPacket::getBlock() {
+	return block;
+}
+
+char HeaderPacket::getOpCode() {
+	return op_code;
+}
+
+void HeaderPacket::setOpCode(char opcode) {
+	op_code = opcode;
+}
+int HeaderPacket::getSerial() {
+	return serial_number;
+}
+void HeaderPacket::setSerial(int serial) {
+	serial_number = serial;
+}
+size_t HeaderPacket::getNextPacketLength() {
+	return next_packet_length;
+}
+void HeaderPacket::setNextPacketLength(size_t len) {
+	next_packet_length = len;
+}
+char HeaderPacket::getTransmitionType() {
+	return transmition_type;
+}
+void HeaderPacket::setTransmitionType(char type) {
+	transmition_type = type;
 }

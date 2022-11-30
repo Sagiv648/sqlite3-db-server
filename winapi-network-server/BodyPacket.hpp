@@ -1,23 +1,22 @@
 #ifndef BODY_PACKET_H_
 #define BODY_PACKET_H_
-#include "Packet.hpp"
 
-class BodyPacket : public Packet
+#include "PacketBlock.hpp"
+#include "Table.hpp"
+
+
+
+
+class BodyPacket
 {
+	vector<PacketBlock> blocks;
 	
 public:
-	void buildPacket() override;
-	bool recievePacket(SOCKET sender) override;
-	void setPacket(char opcode, int serialNum, size_t nextPacketLen, char transmitionType, Table& t);
-	void setTable(Table& t);
-	char getOpCode();
-	void setOpCode(char opcode);
-	int getSerial();
-	void setSerial(int serial);
-	size_t getNextPacketLength();
-	void setNextPacketLength(size_t len);
-	char getTransmitionType();
-	void setTransmitionType(char type);
+	BodyPacket(Table& t);
+	BodyPacket();
+	void buildPacket(Table& tableInfo);
+	bool recievePacket(SOCKET sender);
+	
 	vector<PacketBlock> getBlocks();
 
 };

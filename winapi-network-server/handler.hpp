@@ -7,12 +7,10 @@
 #endif
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
-#include <Windows.h>
-#include <sqlite3.h>
-#include <WinSock2.h>
 #include "utils.hpp"
-//#include "packet.hpp"
 #include "network.hpp"
+#include "Table.hpp"
+
 
 #define MAX_HANDLERS 5
 
@@ -20,9 +18,16 @@ DWORD mainHandler(void* handlerInput);
 
  struct handler_input {
 
-	Packet p;
+	
 	Table t;
 	SOCKET connected_socket;
+	handler_input() {
+		connected_socket = SOCKET_ERROR;
+		
+	}
+	handler_input& operator=( handler_input& right) {
+		return right;
+	}
 
 
 };

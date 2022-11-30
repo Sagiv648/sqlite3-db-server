@@ -1,3 +1,4 @@
+#include "utils.hpp"
 #include "handler.hpp"
 
 
@@ -33,13 +34,7 @@ DWORD mainHandler(void* handlerInput) {
 		}
 		if (firstEntry)
 			firstEntry = !firstEntry;
-		
-		if (!handler->handlerInput.t.getHeaderPacket().recievePacket(handler->handlerInput.connected_socket)) {
-
-			cout << "Error occured while reading the header " << WSAGetLastError() << '\n';
-			continue;
-
-		}
+	
 		
 		
 		uint32_t sz = 0;
@@ -47,7 +42,7 @@ DWORD mainHandler(void* handlerInput) {
 		uint32_t sent = 0;
 		
 		
-		switch (handler->handlerInput.t.getHeaderPacket().getTransmitionType())
+		switch (1)
 		{
 		case READ_TABLE:
 
@@ -55,19 +50,17 @@ DWORD mainHandler(void* handlerInput) {
 				cout << "error occured with reading\n";
 			}
 
-			packet::buildDataPacket(handler->handlerInput.t);
-			serverSender = packet(SERVER_SENDER,handler->handlerInput.p.serial_number, handler->handlerInput.t.getByteSz(), handler->handlerInput.p.transmition_type,
-				handler->handlerInput.t.getDbName(), handler->handlerInput.t.getTableName(),true);
-			sz = serverSender.buildHeaderPacket(headerBuffer);
+			
+			
 
 			
-			if ((sent = send(handler->handlerInput.connected_socket, headerBuffer, sz, 0)) == SOCKET_ERROR) {
+			if ((sent = send(handler->handlerInput.connected_socket, headerBuffer, (int)sz, 0)) == SOCKET_ERROR) {
 				cout << "Failure to send packets to the client with winsocket error " << WSAGetLastError() << '\n';
 				continue;
 			}
 			sent = 0;
 
-			if ((sent = send(handler->handlerInput.connected_socket, handler->handlerInput.t.getBackBuffer(), handler->handlerInput.t.getByteSz(), 0)) == SOCKET_ERROR) {
+			if ((sent = send(handler->handlerInput.connected_socket, handler->handlerInput.t.getBackBuffer(), (int)handler->handlerInput.t.getByteSz(), 0)) == SOCKET_ERROR) {
 				cout << "Failure to send data to the client with winsocket error " << WSAGetLastError() << '\n';
 				continue;
 				total += sent;

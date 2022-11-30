@@ -1,7 +1,14 @@
 #include "BodyPacket.hpp"
 
 
-void BodyPacket::buildPacket() {
+
+BodyPacket::BodyPacket() 
+{
+	
+	blocks = vector<PacketBlock>();
+}
+
+void BodyPacket::buildPacket(Table& tableInfo) {
 
 	string buffer("");
 	buffer += "{\r\n";
@@ -102,4 +109,8 @@ bool BodyPacket::recievePacket(SOCKET sender) {
 	}*/
 
 	return true;
+}
+
+vector<PacketBlock> BodyPacket::getBlocks() {
+	return blocks;
 }

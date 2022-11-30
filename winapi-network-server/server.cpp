@@ -4,15 +4,11 @@
 #endif
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
-#include <Windows.h>
-#include <WinSock2.h>
-#include <iostream>
-#include <sqlite3.h>
-#include <WS2tcpip.h>
+
 #include "utils.hpp"
 #include "network.hpp"
-#include "packet.hpp"
-#include "table.hpp"
+
+
 #include "handler.hpp"
 
 #pragma comment(lib, "Ws2_32.lib")
@@ -120,20 +116,20 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
-void writeToFileTest(char* buffer) {
-
-	HANDLE file = CreateFileA("test.txt", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (file == INVALID_HANDLE_VALUE) {
-		cout << "Error while opening file " << GetLastError() << '\n';
-		ExitProcess(1);
-	}
-	DWORD numWritten;
-	if (WriteFile(file, buffer, strlen(buffer), &numWritten, NULL) == 0) {
-		cout << "Error while writing " << GetLastError() << '\n';
-		ExitProcess(1);
-	}
-	CloseHandle(file);
-}
+//void writeToFileTest(char* buffer) {
+//
+//	HANDLE file = CreateFileA("test.txt", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+//	if (file == INVALID_HANDLE_VALUE) {
+//		cout << "Error while opening file " << GetLastError() << '\n';
+//		ExitProcess(1);
+//	}
+//	DWORD numWritten;
+//	if (WriteFile(file, buffer, strlen(buffer), &numWritten, NULL) == 0) {
+//		cout << "Error while writing " << GetLastError() << '\n';
+//		ExitProcess(1);
+//	}
+//	CloseHandle(file);
+//}
 
 SOCKET server_setup(unsigned short port, unsigned long addr) {
 
@@ -194,7 +190,7 @@ SOCKET server_setup(unsigned short port, unsigned long addr) {
 
 
 	if (bind(serverSocket, args.isAutomatic ? result->ai_addr : (sockaddr*)&address, 
-		args.isAutomatic ?  result->ai_addrlen :  (size_t)sizeof(address)) == SOCKET_ERROR) {
+		args.isAutomatic ?  (int)result->ai_addrlen :  sizeof(address)) == SOCKET_ERROR) {
 		std::cout << "Server failed to bind with winsocket error " << WSAGetLastError() << '\n';
 		closesocket(serverSocket);
 		WSACleanup();
